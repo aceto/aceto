@@ -1,19 +1,46 @@
-from hilbert_curve import hilbert
-from fileinput import input as fileinput
-from math import ceil, log2
-from toolib.tools import eprint
-import json
+"""
+Aceto - A language based on 2D hilbert curve grids
 
-stack = []
+Usage:
+    aceto.py [options] <filename>
+
+Options:
+    -v --verbose    Be verbose. Can be specified several times.
+"""
+import sys
+from math import ceil, log2
+from collections import defaultdict
+from docopt import docopt
+from hilbert_curve import hilbert
+
+
+class Stacks(object):
+    def __init__(self):
+        self.stacks = defaultdict(list)
+        self.sid = 0
+
+    def push(self, thing):
+        self.stacks[self.sid].append(thing)
+
+    def pop(self):
+        try:
+            return self.stacks[self.sid].pop()
+        except IndexError:
+            return 0
+
+stack = Stacks()
 code = []
 
-for line in reversed(list(fileinput())):
-    code.append(list(line.rstrip("\n")))
+args = docopt(__doc__)
+def eprint(level, *pargs, **kwargs):
+    if level >= args['--verbose']:
+        print(*pargs, file=sys.stderr, **kwargs)
 
-# eprint(code)
+with open(args['<filename>']) as f:
+    for line in reversed(f.readlines()):
+        code.append(list(line.rstrip("\n")))
 
 p = ceil(log2(max([len(code), max(len(line) for line in code)])))
-eprint("Set p to", p)
 
 def next_coord(x, y, p):
     """Return the next coordinate, or None if done"""
@@ -22,7 +49,8 @@ def next_coord(x, y, p):
     return x, y
 
 def execute_command(cmd, x, y):
-    eprint("cmd:", cmd)
+    if cmd != " ":
+            eprint(1, "cmd:", cmd)
     if cmd == "<":
         return (x, y-1)
     elif cmd == ">":
@@ -32,55 +60,83 @@ def execute_command(cmd, x, y):
     elif cmd == "^":
         return (x+1, y)
     elif cmd.isnumeric():
-        stack.append(int(cmd))
+        stack.push(int(cmd))
     elif cmd == "+":
         x = stack.pop()
         y = stack.pop()
-        stack.append(x+y)
+        stack.push(x+y)
     elif cmd == "-":
         x = stack.pop()
         y = stack.pop()
-        stack.append(x-y)
+        stack.push(x-y)
     elif cmd == "*":
         x = stack.pop()
         y = stack.pop()
-        stack.append(x*y)
+        stack.push(x*y)
     elif cmd == "%":
         x = stack.pop()
         y = stack.pop()
-        stack.append(x%y)
+        stack.push(x%y)
     elif cmd == "=":
         x = stack.pop()
         y = stack.pop()
-        stack.append(x==y)
+        stack.push(x==y)
     elif cmd == "p":
         print(stack.pop())
     elif cmd == 'r':
-        stack.append(input())
+        stack.push(input())
+    elif cmd == 's':
+        x = stack.pop()
+        y = stack.pop()
+        stack.push(x)
+        stack.push(y)
     elif cmd == 'i':
-        stack.append(int(stack.pop()))
+        x = stack.pop()
+        try:
+            stack.push(int(x))
+        except:
+            stack.push(0)
+    elif cmd == 'f':
+        x = stack.pop()
+        try:
+            stack.push(float(x))
+        except:
+            stack.push(0)
     elif cmd == 'd':
         x = stack.pop()
-        stack.append(x)
-        stack.append(x)
+        stack.push(x)
+        stack.push(x)
+    elif cmd == ')':
+        stack.sid += 1
+    elif cmd == '(':
+        stack.sid -= 1
+    elif cmd == '{':
+        x = stack.pop()
+        stack.sid -= 1
+        stack.push(x)
+        stack.sid += 1
+    elif cmd == '}':
+        x = stack.pop()
+        stack.sid += 1
+        stack.push(x)
+        stack.sid -= 1
     elif cmd == '!':
-        stack.append(not stack.pop())
+        stack.push(not stack.pop())
     elif cmd == '|':
         cond = stack.pop()
         if cond:
             newpos = (x, 2**p-(y+1))
-            eprint("Mirroring horizontally from", x, y, "to", newpos)
+            eprint(2, "Mirroring horizontally from", x, y, "to", newpos)
             return newpos
     elif cmd == '_':
         cond = stack.pop()
         if cond:
             newpos = (2**p-(x+1), y)
-            eprint("Mirroring vertically from", x, y, "to", newpos)
+            eprint(2, "Mirroring vertically from", x, y, "to", newpos)
             return newpos
 
 x, y = 0, 0
 while True:
-    # eprint(x,y)
     try:
         cmd = code[x][y]
     except IndexError:
