@@ -16,6 +16,31 @@ Every character corresponds to a command. There are many commands, most of them
 are concerned with the manipulation of a stack. Aceto comes with an unlimited
 amount of stacks, one of which is the active stack (by default 0).
 
+## Example
+
+As an example, let's look at the following code:
+
+    5+24
+    *cp+
+    6+ v
+    37 p
+
+Without knowing the corresponding Hilbert curve, this can be hard to read. But
+when you put the code on top of a picture of a grade 2 Hilbert curve, it starts
+getting easier to understand at least the code flow:
+
+![Example code that prints "A6"](example.png)
+
+First `3` and `7` are pushed on the stack, and added, which leaves a `10` on the
+stack. Next, a `6` is pushed and multiplied with the `10`, leaving a `60` on the
+stack. Then, `5` is added to the number, resulting in `65`.
+
+`c` converts the number to a character (65 is the ASCII code for `A`). `p`
+prints the result. Next, we add `2` and `4`, resulting in `6`. The `v` makes the
+interpreter move downwards (despite the curve). In this case, not writing the
+`v` wouldn't have made a difference, because spaces do nothing. The final `p`
+prints the number `6` that is on the stack.
+
 ## Installation
 
     git clone https://github.com/L3viathan/aceto --recursive
