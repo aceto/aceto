@@ -33,7 +33,7 @@ code = []
 
 args = docopt(__doc__)
 def eprint(level, *pargs, **kwargs):
-    if level >= args['--verbose']:
+    if level <= args['--verbose']:
         print(*pargs, file=sys.stderr, **kwargs)
 
 with open(args['<filename>']) as f:
@@ -68,7 +68,7 @@ def execute_command(cmd, x, y):
     elif cmd == "-":
         x = stack.pop()
         y = stack.pop()
-        stack.push(x-y)
+        stack.push(y-x)
     elif cmd == "*":
         x = stack.pop()
         y = stack.pop()
@@ -76,13 +76,13 @@ def execute_command(cmd, x, y):
     elif cmd == "%":
         x = stack.pop()
         y = stack.pop()
-        stack.push(x%y)
+        stack.push(y%x)
     elif cmd == "=":
         x = stack.pop()
         y = stack.pop()
         stack.push(x==y)
     elif cmd == "p":
-        print(stack.pop())
+        print(stack.pop(), end='')
     elif cmd == 'r':
         stack.push(input())
     elif cmd == 's':
@@ -94,6 +94,30 @@ def execute_command(cmd, x, y):
         x = stack.pop()
         try:
             stack.push(int(x))
+        except:
+            stack.push(0)
+    elif cmd == 'I':
+        x = stack.pop()
+        try:
+            stack.push(int(x)+1)
+        except:
+            stack.push(0)
+    elif cmd == 'D':
+        x = stack.pop()
+        try:
+            stack.push(int(x)-1)
+        except:
+            stack.push(0)
+    elif cmd == 'c':
+        x = stack.pop()
+        try:
+            stack.push(chr(x))
+        except:
+            stack.push('\ufffd')
+    elif cmd == 'o':
+        x = stack.pop()
+        try:
+            stack.push(ord(x))
         except:
             stack.push(0)
     elif cmd == 'f':
@@ -122,6 +146,8 @@ def execute_command(cmd, x, y):
         stack.sid -= 1
     elif cmd == '!':
         stack.push(not stack.pop())
+    elif cmd == 'X':
+        sys.exit()
     elif cmd == '|':
         cond = stack.pop()
         if cond:
