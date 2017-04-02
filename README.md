@@ -83,4 +83,4 @@ the stack end up removing it.
 - `X`: Exit the interpreter abruptly.
 - `|`, `_`: Special commands that make the interpreter ignore the shape of the
   Hilbert curve for this turn and instead move to the point on the grid mirrored
-  vertically/horizontally.
+  vertically/horizontally, but only if the popped value is truthy.
