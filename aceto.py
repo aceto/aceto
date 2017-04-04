@@ -14,10 +14,33 @@ from docopt import docopt
 from hilbert_curve import hilbert
 
 
-class Stacks(object):
-    def __init__(self):
+class Aceto(object):
+    def __init__(self, args):
         self.stacks = defaultdict(list)
         self.sid = 0
+        self.code = []
+        self.x, self.y = 0, 0
+        with open(args['<filename>']) as f:
+            for line in reversed(f.readlines()):
+                self.code.append(list(line.rstrip("\n")))
+        self.verbosity = args['--verbose']
+        self.p = ceil(log2(max([len(self.code), max(len(line) for line in self.code)])))
+        # annotate this!
+        self.commands = {}
+        d = type(self).__dict__
+        for key in d:
+            try:
+                chars = d[key].__annotations__['return']
+                for c in chars:
+                    self.commands[c] = d[key]
+            except KeyError:
+                pass
+            except AttributeError:
+                pass
+
+    def run(self):
+        while True:
+            self.step()
 
     def push(self, thing):
         self.stacks[self.sid].append(thing)
@@ -28,149 +51,206 @@ class Stacks(object):
         except IndexError:
             return 0
 
-stack = Stacks()
-code = []
+    def log(self, level, *pargs, **kwargs):
+        if level <= self.verbosity:
+            print(*pargs, file=sys.stderr, **kwargs)
 
-args = docopt(__doc__)
-def eprint(level, *pargs, **kwargs):
-    if level <= args['--verbose']:
-        print(*pargs, file=sys.stderr, **kwargs)
+    def next_coord(self):
+        """Return the next coordinate"""
+        distance = hilbert.distance_from_coordinates([self.y,self.x], self.p, N=2)
+        y, x = hilbert.coordinates_from_distance(distance+1, self.p, N=2)
+        return x, y
 
-with open(args['<filename>']) as f:
-    for line in reversed(f.readlines()):
-        code.append(list(line.rstrip("\n")))
+    def step(self):
+        try:
+            cmd = self.code[self.x][self.y]
+        except IndexError:
+            cmd = ' '  # nop
+        self.log(1, cmd, end='') if cmd != ' ' else None
+        method = self.commands.get(cmd, Aceto._nop)
+        method(self, cmd)
 
-p = ceil(log2(max([len(code), max(len(line) for line in code)])))
+    def move(self, coords=None):
+        if coords is not None:
+            x, y = coords
+        else:
+            x, y = self.next_coord()
+        if x >= 2**self.p or y>= 2**self.p or x < 0 or y < 0:
+            sys.exit()
+        self.x, self.y = x, y
 
-def next_coord(x, y, p):
-    """Return the next coordinate, or None if done"""
-    distance = hilbert.distance_from_coordinates([y,x], p, N=2)
-    y, x = hilbert.coordinates_from_distance(distance+1, p, N=2)
-    return x, y
+    def _nop(self, cmd) -> ' ':
+        self.move()
 
-def execute_command(cmd, x, y):
-    if cmd != " ":
-            eprint(1, "cmd:", cmd)
-    if cmd == "<":
-        return (x, y-1)
-    elif cmd == ">":
-        return (x, y+1)
-    elif cmd == "v":
-        return (x-1, y)
-    elif cmd == "^":
-        return (x+1, y)
-    elif cmd.isnumeric():
-        stack.push(int(cmd))
-    elif cmd == "+":
-        x = stack.pop()
-        y = stack.pop()
-        stack.push(x+y)
-    elif cmd == "-":
-        x = stack.pop()
-        y = stack.pop()
-        stack.push(y-x)
-    elif cmd == "*":
-        x = stack.pop()
-        y = stack.pop()
-        stack.push(x*y)
-    elif cmd == "%":
-        x = stack.pop()
-        y = stack.pop()
-        stack.push(y%x)
-    elif cmd == "=":
-        x = stack.pop()
-        y = stack.pop()
-        stack.push(x==y)
-    elif cmd == "p":
-        print(stack.pop(), end='')
-    elif cmd == 'r':
-        stack.push(input())
-    elif cmd == 's':
-        x = stack.pop()
-        y = stack.pop()
-        stack.push(x)
-        stack.push(y)
-    elif cmd == 'i':
-        x = stack.pop()
+    def _left(self, cmd) -> '<':
+        self.move(self.x, self.y-1)
+
+    def _right(self, cmd) -> '>':
+        self.move(self.x, self.y+1)
+
+    def _down(self, cmd) -> 'v':
+        self.move(self.x-1, self.y)
+
+    def _up(self, cmd) -> '^':
+        self.move(self.x+1, self.y)
+
+    def _numeric(self, cmd) -> '1234567890':
+        self.push(int(cmd))
+        self.move()
+
+    def _plus(self, cmd) -> '+':
+        x = self.pop()
+        y = self.pop()
+        self.push(y+x)
+        self.move()
+
+    def _minus(self, cmd) -> '-':
+        x = self.pop()
+        y = self.pop()
+        self.push(y-x)
+        self.move()
+
+    def _times(self, cmd) -> '*':
+        x = self.pop()
+        y = self.pop()
+        self.push(y*x)
+        self.move()
+
+    def _mod(self, cmd) -> '%':
+        x = self.pop()
+        y = self.pop()
+        self.push(y%x)
+        self.move()
+
+    def _div(self, cmd) -> '/':
+        x = self.pop()
+        y = self.pop()
+        self.push(y//x)
+        self.move()
+
+    def _equals(self, cmd) -> '=':
+        x = self.pop()
+        y = self.pop()
+        self.push(y==x)
+        self.move()
+
+    def _print(self, cmd) -> 'p':
+        print(self.pop(), end='')
+        self.move()
+
+    def _read(self, cmd) -> 'r':
+        self.push(input().rstrip('\n'))
+        self.move()
+
+    def _swap(self, cmd) -> 's':
+        x = self.pop()
+        y = self.pop()
+        self.push(x)
+        self.push(y)
+        self.move()
+
+    def _int(self, cmd) -> 'i':
+        x = self.pop()
         try:
-            stack.push(int(x))
+            self.push(int(x))
         except:
-            stack.push(0)
-    elif cmd == 'I':
-        x = stack.pop()
+            self.push(0)
+        self.move()
+
+    def _increment(self, cmd) -> 'I':
+        x = self.pop()
         try:
-            stack.push(int(x)+1)
+            self.push(x+1)
         except:
-            stack.push(0)
-    elif cmd == 'D':
-        x = stack.pop()
+            self.push(1)
+        self.move()
+
+    def _decrement(self, cmd) -> 'D':
+        x = self.pop()
         try:
-            stack.push(int(x)-1)
+            self.push(x-1)
         except:
-            stack.push(0)
-    elif cmd == 'c':
-        x = stack.pop()
+            self.push(1)
+        self.move()
+
+    def _chr(self, cmd) -> 'c':
+        x = self.pop()
         try:
-            stack.push(chr(x))
+            self.push(chr(x))
         except:
-            stack.push('\ufffd')
-    elif cmd == 'o':
-        x = stack.pop()
+            self.push('\ufffd')
+        self.move()
+
+    def _ord(self, cmd) -> 'o':
+        x = self.pop()
         try:
-            stack.push(ord(x))
+            self.push(ord(x))
         except:
-            stack.push(0)
-    elif cmd == 'f':
-        x = stack.pop()
+            self.push(0)
+        self.move()
+
+    def _float(self, cmd) -> 'f':
+        x = self.pop()
         try:
-            stack.push(float(x))
+            self.push(float(x))
         except:
-            stack.push(0)
-    elif cmd == 'd':
-        x = stack.pop()
-        stack.push(x)
-        stack.push(x)
-    elif cmd == ')':
-        stack.sid += 1
-    elif cmd == '(':
-        stack.sid -= 1
-    elif cmd == '{':
-        x = stack.pop()
-        stack.sid -= 1
-        stack.push(x)
-        stack.sid += 1
-    elif cmd == '}':
-        x = stack.pop()
-        stack.sid += 1
-        stack.push(x)
-        stack.sid -= 1
-    elif cmd == '!':
-        stack.push(not stack.pop())
-    elif cmd == 'X':
+            self.push(0)
+        self.move()
+
+    def _duplicate(self, cmd) -> 'd':
+        x = self.pop()
+        self.push(x)
+        self.push(x)
+        self.move()
+
+    def _next_stack(self, cmd) -> ')':
+        self.sid += 1
+        self.move()
+
+    def _prev_stack(self, cmd) -> '(':
+        self.sid -= 1
+        self.move()
+
+    def _move_next_stack(self, cmd) -> '}':
+        x = self.pop()
+        self.sid += 1
+        self.push(x)
+        self.sid -= 1
+        self.move()
+
+    def _move_prev_stack(self, cmd) -> '{':
+        x = self.pop()
+        self.sid -= 1
+        self.push(x)
+        self.sid += 1
+        self.move()
+
+    def _negation(self, cmd) -> '!':
+        self.push(not self.pop())
+        self.move()
+
+    def _die(self, cmd) -> 'X':
         sys.exit()
-    elif cmd == '|':
-        cond = stack.pop()
-        if cond:
-            newpos = (x, 2**p-(y+1))
-            eprint(2, "Mirroring horizontally from", x, y, "to", newpos)
-            return newpos
-    elif cmd == '_':
-        cond = stack.pop()
-        if cond:
-            newpos = (2**p-(x+1), y)
-            eprint(2, "Mirroring vertically from", x, y, "to", newpos)
-            return newpos
 
-x, y = 0, 0
-while True:
-    try:
-        cmd = code[x][y]
-    except IndexError:
-        cmd = ' '  # nop
-    rpos = execute_command(cmd, x, y)
-    if rpos is None:
-        x, y = next_coord(x, y, p)
-        if x >= 2**p or y>= 2**p or x < 0 or y < 0:
-            break  # done
-    else:
-        x, y = rpos
+    def _mirror_h(self, cmd) -> '|':
+        cond = self.pop()
+        if cond:
+            new_pos = (self.x, 2**self.p-(self.y+1))
+            self.log(2, "Mirroring horizontally from", self.x, self.y, "to", new_pos)
+            self.move(new_pos)
+        else:
+            self.move()
+
+    def _mirror_v(self, cmd) -> '_':
+        cond = self.pop()
+        if cond:
+            new_pos = (2**self.p-(self.x+1), self.y)
+            self.log(2, "Mirroring vertically from", self.x, self.y, "to", new_pos)
+            self.move(new_pos)
+        else:
+            self.move()
+
+if __name__ == '__main__':
+    args = docopt(__doc__)
+    A=Aceto(args)
+    A.run()
