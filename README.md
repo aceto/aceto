@@ -1,7 +1,10 @@
 # Aceto
+This is Aceto v1.0.
+
 Aceto is a simple stack language that is based on a 2D Hilbert curve grid. The
 name is a reference to Aceto Balsamico (balsamic vinegar), and to
-[OIL](https://github.com/L3viathan/OIL).
+[OIL](https://github.com/L3viathan/OIL). It was a birthday present for
+[@sarnthil](https://github.com/sarnthil).
 
 ## Concept
 A program written in Aceto consists of a square grid of characters. The side

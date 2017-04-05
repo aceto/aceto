@@ -251,6 +251,6 @@ class Aceto(object):
             self.move()
 
 if __name__ == '__main__':
-    args = docopt(__doc__)
+    args = docopt(__doc__, version="1.0")
     A=Aceto(args)
     A.run()
