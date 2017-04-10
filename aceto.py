@@ -128,6 +128,12 @@ class Aceto(object):
         self.push(y//x)
         self.move()
 
+    def _floatdiv(self, cmd) -> ':':
+        x = self.pop()
+        y = self.pop()
+        self.push(y/x)
+        self.move()
+
     def _equals(self, cmd) -> '=':
         x = self.pop()
         y = self.pop()
