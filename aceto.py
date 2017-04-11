@@ -83,16 +83,16 @@ class Aceto(object):
         self.move()
 
     def _left(self, cmd) -> '<':
-        self.move(self.x, self.y-1)
+        self.move((self.x, self.y-1))
 
     def _right(self, cmd) -> '>':
-        self.move(self.x, self.y+1)
+        self.move((self.x, self.y+1))
 
     def _down(self, cmd) -> 'v':
-        self.move(self.x-1, self.y)
+        self.move((self.x-1, self.y))
 
     def _up(self, cmd) -> '^':
-        self.move(self.x+1, self.y)
+        self.move((self.x+1, self.y))
 
     def _numeric(self, cmd) -> '1234567890':
         self.push(int(cmd))
@@ -141,7 +141,7 @@ class Aceto(object):
         self.move()
 
     def _print(self, cmd) -> 'p':
-        print(self.pop(), end='')
+        print(self.pop(), end='', flush=True)
         self.move()
 
     def _read(self, cmd) -> 'r':
