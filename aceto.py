@@ -18,6 +18,9 @@ class Aceto(object):
     def __init__(self, args):
         self.stacks = defaultdict(list)
         self.sid = 0
+        self.dir = 1
+        self.mode = 'command'
+        self.buf = ''
         self.code = []
         self.x, self.y = 0, 0
         with open(args['<filename>']) as f:
@@ -58,7 +61,7 @@ class Aceto(object):
     def next_coord(self):
         """Return the next coordinate"""
         distance = hilbert.distance_from_coordinates([self.y,self.x], self.p, N=2)
-        y, x = hilbert.coordinates_from_distance(distance+1, self.p, N=2)
+        y, x = hilbert.coordinates_from_distance(distance+self.dir, self.p, N=2)
         return x, y
 
     def step(self):
@@ -66,9 +69,21 @@ class Aceto(object):
             cmd = self.code[self.x][self.y]
         except IndexError:
             cmd = ' '  # nop
-        self.log(1, cmd, end='') if cmd != ' ' else None
-        method = self.commands.get(cmd, Aceto._nop)
-        method(self, cmd)
+        if self.mode == 'command':
+            self.log(1, cmd, end='') if cmd != ' ' else None
+            method = self.commands.get(cmd, Aceto._nop)
+            method(self, cmd)
+        else:
+            if cmd == '"' and self.mode == 'string':
+                self.push(self.buf)
+                self.buf = ''
+                self.mode = 'command'
+            elif cmd == '\\' and self.mode == 'string':
+                self.mode = 'string-escape'
+            else:
+                self.buf += cmd
+                self.mode = 'string'
+            self.move()
 
     def move(self, coords=None):
         if coords is not None:
@@ -259,6 +274,14 @@ class Aceto(object):
             self.move(new_pos)
         else:
             self.move()
+
+    def _reverse(self, cmd) -> 'u': #reverse direction
+        self.dir *= -1
+        self.move()
+
+    def _string_literal(self, cmd) -> '"':
+        self.mode = 'string'
+        self.move()
 
 if __name__ == '__main__':
     args = docopt(__doc__, version="1.0")
