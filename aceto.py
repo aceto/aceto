@@ -6,6 +6,7 @@ Usage:
 
 Options:
     -v --verbose    Be verbose. Can be specified several times.
+    -F --flush      Always flush after printing.
 """
 import sys
 from math import ceil, log2
@@ -27,6 +28,7 @@ class Aceto(object):
             for line in reversed(f.readlines()):
                 self.code.append(list(line.rstrip("\n")))
         self.verbosity = args['--verbose']
+        self.flushness = args['--flush']
         self.p = ceil(log2(max([len(self.code), max(len(line) for line in self.code)])))
         # annotate this!
         self.commands = {}
@@ -73,16 +75,21 @@ class Aceto(object):
             self.log(1, cmd, end='') if cmd != ' ' else None
             method = self.commands.get(cmd, Aceto._nop)
             method(self, cmd)
-        else:
+        elif self.mode in ('string', 'string-escape'):
             if cmd == '"' and self.mode == 'string':
                 self.push(self.buf)
                 self.buf = ''
                 self.mode = 'command'
             elif cmd == '\\' and self.mode == 'string':
                 self.mode = 'string-escape'
+            elif self.mode == 'string-escape' and cmd in "nt":
+                self.buf += {'n': '\n', 't': '\t'}[cmd]
+                self.mode = 'string'
             else:
                 self.buf += cmd
                 self.mode = 'string'
+            self.move()
+        elif self.mode == 'escape':
             self.move()
 
     def move(self, coords=None):
@@ -156,7 +163,7 @@ class Aceto(object):
         self.move()
 
     def _print(self, cmd) -> 'p':
-        print(self.pop(), end='', flush=True)
+        print(self.pop(), end='', flush=self.flushness)
         self.move()
 
     def _newline(self, cmd) -> 'n':
@@ -275,12 +282,25 @@ class Aceto(object):
         else:
             self.move()
 
+    def _mirror_vh(self, cmd) -> '#':
+        cond = self.pop()
+        if cond:
+            new_pos = (2**self.p-(self.x+1), 2**self.p-(self.y+1))
+            self.log(2, "Mirroring (both) from", self.x, self.y, "to", new_pos)
+            self.move(new_pos)
+        else:
+            self.move()
+
     def _reverse(self, cmd) -> 'u': #reverse direction
         self.dir *= -1
         self.move()
 
     def _string_literal(self, cmd) -> '"':
         self.mode = 'string'
+        self.move()
+
+    def _escape(self, cmd) -> '\\':
+        self.mode = 'escape'
         self.move()
 
 if __name__ == '__main__':
