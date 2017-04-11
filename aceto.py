@@ -144,6 +144,10 @@ class Aceto(object):
         print(self.pop(), end='', flush=True)
         self.move()
 
+    def _newline(self, cmd) -> 'n':
+        print()
+        self.move()
+
     def _read(self, cmd) -> 'r':
         self.push(input().rstrip('\n'))
         self.move()
