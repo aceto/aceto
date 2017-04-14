@@ -2,23 +2,45 @@
 Aceto - A language based on 2D hilbert curve grids
 
 Usage:
-    aceto.py [options] <filename>
+    aceto.py [-v ...] [options] <filename>
 
 Options:
     -v --verbose    Be verbose. Can be specified several times.
     -F --flush      Always flush after printing.
+    -e --err-all    Ignore catch marks (@) and always error out
 """
 import sys
+import os
+import signal
+import tty
+import termios
 from math import ceil, log2
 from collections import defaultdict
+from random import choice, random
+from math import e, pi
 from docopt import docopt
 from hilbert_curve import hilbert
+
+
+class colors(object):
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+class CodeException(Exception):
+    pass
 
 
 class Aceto(object):
     def __init__(self, args):
         self.stacks = defaultdict(list)
         self.sid = 0
+        self.catch_mark = None
         self.dir = 1
         self.mode = 'command'
         self.buf = ''
@@ -29,6 +51,7 @@ class Aceto(object):
                 self.code.append(list(line.rstrip("\n")))
         self.verbosity = args['--verbose']
         self.flushness = args['--flush']
+        self.allerr = args['--err-all']
         self.p = ceil(log2(max([len(self.code), max(len(line) for line in self.code)])))
         # annotate this!
         self.commands = {}
@@ -45,7 +68,14 @@ class Aceto(object):
 
     def run(self):
         while True:
-            self.step()
+            try:
+                self.step()
+            except Exception as e:
+                if self.catch_mark is not None and not self.allerr:
+                    self.log(1, "Caught", e)
+                    self.x, self.y = self.catch_mark
+                else:
+                    raise e
 
     def push(self, thing):
         self.stacks[self.sid].append(thing)
@@ -58,7 +88,9 @@ class Aceto(object):
 
     def log(self, level, *pargs, **kwargs):
         if level <= self.verbosity:
+            print(colors.FAIL, file=sys.stderr, end='')
             print(*pargs, file=sys.stderr, **kwargs)
+            print(colors.ENDC, file=sys.stderr, end='', flush=True)
 
     def next_coord(self):
         """Return the next coordinate"""
@@ -67,6 +99,7 @@ class Aceto(object):
         return x, y
 
     def step(self):
+        self.log(3, self.x, self.y)
         try:
             cmd = self.code[self.x][self.y]
         except IndexError:
@@ -96,7 +129,10 @@ class Aceto(object):
         if coords is not None:
             x, y = coords
         else:
-            x, y = self.next_coord()
+            if self.dir == -1 and (0,0) == (self.x, self.y):
+                x, y = -1, -1
+            else:
+                x, y = self.next_coord()
         if x >= 2**self.p or y>= 2**self.p or x < 0 or y < 0:
             sys.exit()
         self.x, self.y = x, y
@@ -104,16 +140,24 @@ class Aceto(object):
     def _nop(self, cmd) -> ' ':
         self.move()
 
-    def _left(self, cmd) -> '<':
+    def _left(self, cmd) -> '<W':
+        if cmd.isalpha():
+            self.code[self.x][self.y] = 'N'
         self.move((self.x, self.y-1))
 
-    def _right(self, cmd) -> '>':
+    def _right(self, cmd) -> '>E':
+        if cmd.isalpha():
+            self.code[self.x][self.y] = 'S'
         self.move((self.x, self.y+1))
 
-    def _down(self, cmd) -> 'v':
+    def _down(self, cmd) -> 'vS':
+        if cmd.isalpha():
+            self.code[self.x][self.y] = 'W'
         self.move((self.x-1, self.y))
 
-    def _up(self, cmd) -> '^':
+    def _up(self, cmd) -> '^N':
+        if cmd.isalpha():
+            self.code[self.x][self.y] = 'E'
         self.move((self.x+1, self.y))
 
     def _numeric(self, cmd) -> '1234567890':
@@ -147,13 +191,19 @@ class Aceto(object):
     def _div(self, cmd) -> '/':
         x = self.pop()
         y = self.pop()
-        self.push(y//x)
+        try:
+            self.push(y//x)
+        except ZeroDivisionError:
+            raise CodeException("Zero division")
         self.move()
 
     def _floatdiv(self, cmd) -> ':':
         x = self.pop()
         y = self.pop()
-        self.push(y/x)
+        try:
+            self.push(y/x)
+        except ZeroDivisionError:
+            raise CodeException("Zero division")
         self.move()
 
     def _equals(self, cmd) -> '=':
@@ -185,8 +235,8 @@ class Aceto(object):
         x = self.pop()
         try:
             self.push(int(x))
-        except:
-            self.push(0)
+        except ValueError:
+            raise CodeException(f"Can't cast {x!r} to int")
         self.move()
 
     def _increment(self, cmd) -> 'I':
@@ -302,6 +352,72 @@ class Aceto(object):
     def _escape(self, cmd) -> '\\':
         self.mode = 'escape'
         self.move()
+
+    def _random_direction(self, cmd) -> '?':
+        cmd_ = random.choice("v^<>")
+        method = self.commands.get(cmd_, Aceto._nop)
+        method(self, cmd)
+
+    def _random_number(self, cmd) -> 'R':
+        self.push(random())
+        self.move()
+
+    def _pi(self, cmd) -> 'P':
+        self.push(pi)
+        self.move()
+
+    def _euler(self, cmd) -> 'e':
+        self.push(pi)
+        self.move()
+
+    def _invert(self, cmd) -> '~':
+        self.push(-self.pop())
+        self.move()
+
+    def _restart(self, cmd) -> 'O':
+        if self.dir==1:
+            self.x, self.y = 0, 0
+        else:
+            length = 2**self.p
+            self.x, self.y = length-1, length-1
+
+    def _getch(self, cmd) -> ',':
+        self.push(getch())
+        self.move()
+
+    def _putch(self, cmd) -> '.':
+        x = self.pop()
+        if type(x) == int:
+            try:
+                x = chr(x)
+            except:
+                x = '\ufffd'
+        first = x[:1]
+        print(first, end='')
+        self.move()
+
+    def _catch_mark(self, cmd) -> '@':
+        self.catch_mark = self.x, self.y
+        self.move()
+
+    def _raise(self, cmd) -> '&':
+        raise CodeException("Raised an &rror.")
+
+
+def getch():
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    try:
+        tty.setraw(sys.stdin.fileno())
+        ch = sys.stdin.read(1)
+        # restore behavior for special things
+        if ch == '\x03':  # ^C
+            raise KeyboardInterrupt
+        elif ch == '\x1a':  # ^Z
+            os.kill(os.getpid(), signal.SIGTSTP)
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+    return ch
 
 if __name__ == '__main__':
     args = docopt(__doc__, version="1.0")
