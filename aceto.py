@@ -2,7 +2,7 @@
 Aceto - A language based on 2D hilbert curve grids
 
 Usage:
-    aceto.py [-v ...] [options] <filename>
+    aceto.py [-v ...] [options] [<filename> ...]
 
 Options:
     -v --verbose    Be verbose. Can be specified several times.
@@ -14,11 +14,12 @@ import os
 import signal
 import tty
 import termios
+import time
+import shutil
 from math import ceil, log2
 from collections import defaultdict
 from random import choice, random
 from math import e, pi
-from time import time
 from docopt import docopt
 from hilbert_curve import hilbert
 
@@ -41,20 +42,11 @@ class Aceto(object):
     def __init__(self, args):
         self.stacks = defaultdict(list)
         self.sid = 0
-        self.catch_mark = None
-        self.timestamp = time.time()
-        self.dir = 1
-        self.mode = 'command'
         self.buf = ''
-        self.code = []
         self.x, self.y = 0, 0
-        with open(args['<filename>']) as f:
-            for line in reversed(f.readlines()):
-                self.code.append(list(line.rstrip("\n")))
         self.verbosity = args['--verbose']
         self.flushness = args['--flush']
         self.allerr = args['--err-all']
-        self.p = ceil(log2(max([len(self.code), max(len(line) for line in self.code)])))
         # annotate this!
         self.commands = {}
         d = type(self).__dict__
@@ -67,6 +59,19 @@ class Aceto(object):
                 pass
             except AttributeError:
                 pass
+
+    def load_code(self, filename):
+        self.code = []
+        with open(filename) as f:
+            for line in reversed(f.readlines()):
+                self.code.append(list(line.rstrip("\n")))
+        self.p = ceil(log2(max([len(self.code), max(len(line) for line in self.code)])))
+        self.x, self.y = 0, 0
+        self.timestamp = time.time()
+        self.catch_mark = None
+        self.dir = 1
+        self.buf = ''
+        self.mode = 'command'
 
     def run(self):
         while True:
@@ -432,4 +437,19 @@ def getch():
 if __name__ == '__main__':
     args = docopt(__doc__, version="1.0")
     A=Aceto(args)
-    A.run()
+    for filename in args['<filename>']:
+        A.load_code(filename)
+        A.run()
+    if not args['<filename>']:
+        cols, _ = shutil.get_terminal_size((80, 20))
+        info = [f'{c} → {f.__name__[1:]}' for c, f in A.commands.items()]
+        maxlen = max(len(x) for x in info) + 1
+        columns = cols // maxlen
+        iinfo = iter(info)
+        try:
+            while True:
+                for _ in range(columns):
+                    print(next(iinfo).ljust(maxlen), end='')
+                print()
+        except StopIteration:
+            print()
