@@ -18,6 +18,7 @@ from math import ceil, log2
 from collections import defaultdict
 from random import choice, random
 from math import e, pi
+from time import time
 from docopt import docopt
 from hilbert_curve import hilbert
 
@@ -41,6 +42,7 @@ class Aceto(object):
         self.stacks = defaultdict(list)
         self.sid = 0
         self.catch_mark = None
+        self.timestamp = time.time()
         self.dir = 1
         self.mode = 'command'
         self.buf = ''
@@ -402,6 +404,14 @@ class Aceto(object):
 
     def _raise(self, cmd) -> '&':
         raise CodeException("Raised an &rror.")
+
+    def _get_time(self, cmd) -> 't':
+        self.push(time.time()-self.timestamp)
+        self.move()
+
+    def _set_time(self, cmd) -> 'T':
+        self.timestamp = time.time()
+        self.move()
 
 
 def getch():
