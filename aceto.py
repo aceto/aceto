@@ -186,26 +186,44 @@ class Aceto(object):
     def _plus(self, cmd) -> '+':
         x = self.pop()
         y = self.pop()
-        self.push(y+x)
-        self.move()
+        try:
+            self.push(y+x)
+            self.move()
+        except TypeError:
+            raise CodeException(f"Can't add {x!r} to {y!r}")
+
+    def _pow(self, cmd) -> 'F':
+        x = self.pop()
+        y = self.pop()
+        try:
+            self.push(y**x)
+            self.move()
+        except TypeError:
+            raise CodeException(f"Can't raise {x!r} to the power of {y!r}")
 
     def _minus(self, cmd) -> '-':
         x = self.pop()
         y = self.pop()
         self.push(y-x)
         self.move()
+        except TypeError:
+            raise CodeException(f"Can't subtract {y!r} from {x!r}")
 
     def _times(self, cmd) -> '*':
         x = self.pop()
         y = self.pop()
         self.push(y*x)
         self.move()
+        except TypeError:
+            raise CodeException(f"Can't multiply {x!r} with {y!r}")
 
     def _mod(self, cmd) -> '%':
         x = self.pop()
         y = self.pop()
         self.push(y%x)
         self.move()
+        except TypeError:
+            raise CodeException(f"Can't get modulo of {x!r} and {y!r}")
 
     def _div(self, cmd) -> '/':
         x = self.pop()
@@ -214,6 +232,8 @@ class Aceto(object):
             self.push(y//x)
         except ZeroDivisionError:
             raise CodeException("Zero division")
+        except TypeError:
+            raise CodeException(f"Can't idivide {x!r} by {y!r}")
         self.move()
 
     def _floatdiv(self, cmd) -> ':':
@@ -223,6 +243,8 @@ class Aceto(object):
             self.push(y/x)
         except ZeroDivisionError:
             raise CodeException("Zero division")
+        except TypeError:
+            raise CodeException(f"Can't fdivide {x!r} by {y!r}")
         self.move()
 
     def _equals(self, cmd) -> '=':
