@@ -129,6 +129,16 @@ class Aceto(object):
                 self.buf += cmd
                 self.mode = 'string'
             self.move()
+        elif self.mode in ('char', 'char-escape'):
+            if cmd == '\\' and self.mode == 'char':
+                self.mode = 'char-escape'
+            elif self.mode == 'char-escape' and cmd in 'nt':
+                self.push({'n': '\n', 't': '\t'}[cmd])
+                self.mode = 'command'
+            else:
+                self.push(cmd)
+                self.mode = 'command'
+            self.move()
         elif self.mode == 'escape':
             self.move()
 
@@ -354,6 +364,10 @@ class Aceto(object):
 
     def _string_literal(self, cmd) -> '"':
         self.mode = 'string'
+        self.move()
+
+    def _char_literal(self, cmd) -> '\'':
+        self.mode = 'char'
         self.move()
 
     def _escape(self, cmd) -> '\\':
