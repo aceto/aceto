@@ -111,8 +111,8 @@ class Aceto(object):
             cmd = self.code[self.x][self.y]
         except IndexError:
             cmd = ' '  # nop
+        self.log(1, cmd, end='') if cmd != ' ' else None
         if self.mode == 'command':
-            self.log(1, cmd, end='') if cmd != ' ' else None
             method = self.commands.get(cmd, Aceto._nop)
             method(self, cmd)
         elif self.mode in ('string', 'string-escape'):
@@ -410,6 +410,12 @@ class Aceto(object):
     def _raise(self, cmd) -> '&':
         raise CodeException("Raised an &rror.")
 
+    def _assert(self, cmd) -> '$':
+        if self.pop():
+            raise CodeException("A$$ertion failed")
+        else:
+            self.move()
+
     def _get_time(self, cmd) -> 't':
         self.push(time.time()-self.timestamp)
         self.move()
@@ -417,6 +423,11 @@ class Aceto(object):
     def _set_time(self, cmd) -> 'T':
         self.timestamp = time.time()
         self.move()
+
+    def _drop(self, cmd) -> 'x':
+        self.pop()
+        self.move()
+
 
 
 def getch():
@@ -442,7 +453,7 @@ if __name__ == '__main__':
         A.run()
     if not args['<filename>']:
         cols, _ = shutil.get_terminal_size((80, 20))
-        info = [f'{c} → {f.__name__[1:]}' for c, f in A.commands.items()]
+        info = [f'{c} {f.__name__[1:]}' for c, f in A.commands.items()]
         maxlen = max(len(x) for x in info) + 1
         columns = cols // maxlen
         iinfo = iter(info)
