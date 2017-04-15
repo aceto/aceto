@@ -72,6 +72,7 @@ class Aceto(object):
         self.dir = 1
         self.buf = ''
         self.mode = 'command'
+        self.previous_cmd = ' '
 
     def run(self):
         while True:
@@ -115,6 +116,7 @@ class Aceto(object):
         if self.mode == 'command':
             method = self.commands.get(cmd, Aceto._nop)
             method(self, cmd)
+            self.previous_cmd = cmd
         elif self.mode in ('string', 'string-escape'):
             if cmd == '"' and self.mode == 'string':
                 self.push(self.buf)
@@ -406,16 +408,9 @@ class Aceto(object):
         self.push(getch())
         self.move()
 
-    def _putch(self, cmd) -> '.':
-        x = self.pop()
-        if type(x) == int:
-            try:
-                x = chr(x)
-            except:
-                x = '\ufffd'
-        first = x[:1]
-        print(first, end='')
-        self.move()
+    def _repeat(self, cmd) -> '.':
+        method = self.commands.get(self.previous_cmd, Aceto._nop)
+        method(self, self.previous_cmd)
 
     def _catch_mark(self, cmd) -> '@':
         self.catch_mark = self.x, self.y

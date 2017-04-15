@@ -1,5 +1,5 @@
 # Aceto
-This is Aceto v1.0.
+This is Aceto v1.1.
 
 Aceto is a simple stack language that is based on a 2D Hilbert curve grid. The
 name is a reference to Aceto Balsamico (balsamic vinegar), and to
@@ -53,37 +53,79 @@ prints the number `6` that is on the stack.
 Unless otherwise specified, commands that perform an action with an element from
 the stack end up removing it.
 
+### General
 - ` ` (a space): Do nothing. Any undefined character will also nop.
-- `0`, `1`, `2`, ..., `9`: Push that number on the active stack.
-- `<`, `>`, `v`, `^`: Special commands that make the interpreter ignore the
-  shape of the Hilbert curve for this turn and instead move in the direction
-  indicated by the character.
-- `+`, `-`, `*`, `%`: Perform that operation (`%` means modulo) with the top two
-  elements of the stack. For operations where the order matters, the operation
-  will take the top element on the stack as the second argument; i.e. `5`, `3`,
-  `-` will leave a 2 on the stack, not a -2.
-- `=`: Take two elements a and b from the stack and put the result of `a==b` on
-  the stack (a boolean value).
-- `p`: Print the element on the stack.
-- `r`: Read a string from the user and put it on the stack.
 - `s`: Swap the top two elements on the stack.
-- `i`: Pop a value, cast it to an integer (if possible, otherwise to 0), and put
-  the result on the stack.
-- `f`: Like `i`, but with float.
-- `I`: Pop a value, increment it, and push it.
-- `D`: Pop a value, decrement it, and push it.
-- `c`: Pop a value, convert it to the character of the unicode value and push
-  it. If the value doesn't correspond to a unicode codepoint, push `U+FFFD`
-  instead.
-- `o`: The opposite of `c`; Pop a character and convert it to the number of its
-  unicode codepoint and push the result. When anything fails, push a 0 instead.
 - `d`: Pop a value and push it twice (duplicate).
 - `(`, `)`: Change the active stack to the left or right stack relative to the
   currently active stack.
 - `{`, `}`: Pop a value and push it on the stack to the left or right (but don't
   change which stack is active).
-- `!`: Push the negation of a popped value.
 - `X`: Exit the interpreter abruptly.
+- `x`: Pop a value and ignore it.
+
+### Movement, Conditions, and Catching
+- `<`, `>`, `v`, `^`: Special commands that make the interpreter ignore the
+  shape of the Hilbert curve for this turn and instead move in the direction
+  indicated by the character.
+- `W`, `E`, `S`, `N`: Like `<>v^`, but turn clockwise after execution.
+- `u`: Reverse the direction the IP is moving.
+- `?`: Move in a random direction.
 - `|`, `_`: Special commands that make the interpreter ignore the shape of the
   Hilbert curve for this turn and instead move to the point on the grid mirrored
   vertically/horizontally, but only if the popped value is truthy.
+- `#`: Like `|`/`_`, but mirrors both vertically and horizontally.
+- `@`: Set the current cell to the catch cell. When a (normal) error occurs, jump here.
+- `&`: Manually raise an error.
+- `$`: Pop a value and assert that it is truthy. Otherwise, raise an error.
+- `O`: Jump to the origin (0,0 or the bottom right cell, if the direction is
+  reversed)
+
+### Arithmetics and Comparisons
+- `+`, `-`, `*`, `%`: Perform that operation (`%` means modulo) with the top two
+  elements of the stack. For operations where the order matters, the operation
+  will take the top element on the stack as the second argument; i.e. `5`, `3`,
+  `-` will leave a 2 on the stack, not a -2.
+- `/`, `:`: Perform division. `/` is integer division, `:` float division.
+- `=`: Take two elements a and b from the stack and put the result of `a==b` on
+  the stack (a boolean value).
+- `I`: Pop a value, increment it, and push it.
+- `D`: Pop a value, decrement it, and push it.
+- `!`: Push the negation of a popped value.
+- `~`: Invert the popped element and push it.
+
+### Literals
+- `0`, `1`, `2`, ..., `9`: Push that number on the active stack.
+- `"`: Starts a string literal. This works pretty much like in other languages.
+  String literals are terminated with another `"`, but escaping (with a
+  backslash) works too. That means that `"\"Hello\\World\n" will result in
+  `"Hello\World\n`, where the `\n` is a newline character (`\t` is also
+  supported). The resulting string will be pushed on the active stack.
+- `'`: Starts a character literal. The next character will be pushed on the
+  stack as a string. Escaping (for `\n`, `\t`, and `\\`) also works, but not for
+  `\'`, because `''` will already accomplish the desired effect (push a single
+  quote character).
+
+### Casting
+- `i`: Pop a value, cast it to an integer (if possible, otherwise to 0), and put
+the result on the stack.
+- `f`: Like `i`, but with float.
+- `c`: Pop a value, convert it to the character of the unicode value and push
+  it. If the value doesn't correspond to a unicode codepoint, push `U+FFFD`
+  instead.
+- `o`: The opposite of `c`; Pop a character and convert it to the number of its
+  unicode codepoint and push the result. When anything fails, push a 0 instead.
+
+### I/O
+- `p`: Print the element on the stack.
+- `r`: Read a string from the user and put it on the stack.
+- `n`: Print a newline.
+- `,`: Get a single character (without requiring a newline).
+
+### Special
+- `\`: Escapes the next character: It will be ignored.
+- `P`, `e`, `R`: Push π, 𝑒, or a random float between 0 and 1.
+- `.`: Repeat the previous command.
+- `T`: Set the global timestamp to now. It is initialized to the time of script
+  start.
+- `t`: Push the difference between now and the global timestamp.
