@@ -204,8 +204,9 @@ class Aceto(object):
     def _minus(self, cmd) -> '-':
         x = self.pop()
         y = self.pop()
-        self.push(y-x)
-        self.move()
+        try:
+            self.push(y-x)
+            self.move()
         except TypeError:
             raise CodeException(f"Can't subtract {y!r} from {x!r}")
 
