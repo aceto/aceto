@@ -1,5 +1,5 @@
 # Aceto
-This is Aceto v1.1.
+This is Aceto v1.2
 
 Aceto is a simple stack language that is based on a 2D Hilbert curve grid. The
 name is a reference to Aceto Balsamico (balsamic vinegar), and to
@@ -61,6 +61,10 @@ the stack end up removing it.
   currently active stack.
 - `{`, `}`: Pop a value and push it on the stack to the left or right (but don't
   change which stack is active).
+- `[`, `]`: Pop a value, move a stack to the left or right, and push it again.
+- `k`: Make the current stack "sticky", i.e. when popping from it the value is
+  not removed, only copied.
+- `K`: Make the current stack unsticky again.
 - `X`: Exit the interpreter abruptly.
 - `x`: Pop a value and ignore it.
 

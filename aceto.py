@@ -111,7 +111,6 @@ class Aceto(object):
         return x, y
 
     def step(self):
-        # self.log(3, self.x, self.y)
         try:
             cmd = self.code[self.x][self.y]
         except IndexError:
@@ -164,12 +163,12 @@ class Aceto(object):
         self.move()
 
     def _left(self, cmd) -> '<W':
-        if cmd.isalpha():
+        if cmd == 'W':
             self.code[self.x][self.y] = 'N'
         self.move((self.x, self.y-1))
 
     def _right(self, cmd) -> '>E':
-        if cmd.isalpha():
+        if cmd == 'E':
             self.code[self.x][self.y] = 'S'
         self.move((self.x, self.y+1))
 
@@ -179,7 +178,7 @@ class Aceto(object):
         self.move((self.x-1, self.y))
 
     def _up(self, cmd) -> '^N':
-        if cmd.isalpha():
+        if cmd == 'N':
             self.code[self.x][self.y] = 'E'
         self.move((self.x+1, self.y))
 
@@ -257,7 +256,7 @@ class Aceto(object):
     def _equals(self, cmd) -> '=':
         x = self.pop()
         y = self.pop()
-        self.log(3, f"Testing equality of {x!r} and {y!r}")
+        self.log(2, f"Testing equality of {x!r} and {y!r}")
         self.push(y==x)
         self.move()
 
