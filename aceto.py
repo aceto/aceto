@@ -41,6 +41,7 @@ class CodeException(Exception):
 class Aceto(object):
     def __init__(self, args):
         self.stacks = defaultdict(list)
+        self.sticky = set()
         self.sid = 0
         self.buf = ''
         self.x, self.y = 0, 0
@@ -90,7 +91,10 @@ class Aceto(object):
 
     def pop(self):
         try:
-            return self.stacks[self.sid].pop()
+            x = self.stacks[self.sid][-1]
+            if self.sid not in self.sticky:
+                self.stacks[self.sid].pop()
+            return x
         except IndexError:
             return 0
 
@@ -107,7 +111,7 @@ class Aceto(object):
         return x, y
 
     def step(self):
-        self.log(3, self.x, self.y)
+        # self.log(3, self.x, self.y)
         try:
             cmd = self.code[self.x][self.y]
         except IndexError:
@@ -213,16 +217,18 @@ class Aceto(object):
     def _times(self, cmd) -> '*':
         x = self.pop()
         y = self.pop()
-        self.push(y*x)
-        self.move()
+        try:
+            self.push(y*x)
+            self.move()
         except TypeError:
             raise CodeException(f"Can't multiply {x!r} with {y!r}")
 
     def _mod(self, cmd) -> '%':
         x = self.pop()
         y = self.pop()
-        self.push(y%x)
-        self.move()
+        try:
+            self.push(y%x)
+            self.move()
         except TypeError:
             raise CodeException(f"Can't get modulo of {x!r} and {y!r}")
 
@@ -251,11 +257,20 @@ class Aceto(object):
     def _equals(self, cmd) -> '=':
         x = self.pop()
         y = self.pop()
+        self.log(3, f"Testing equality of {x!r} and {y!r}")
         self.push(y==x)
         self.move()
 
     def _print(self, cmd) -> 'p':
         print(self.pop(), end='', flush=self.flushness)
+        self.move()
+
+    def _sticky_mode_on(self, cmd) -> 'k':
+        self.sticky.add(self.sid)
+        self.move()
+
+    def _sticky_mode_off(self, cmd) -> 'K':
+        self.sticky.remove(self.sid)
         self.move()
 
     def _newline(self, cmd) -> 'n':
@@ -428,7 +443,10 @@ class Aceto(object):
             self.x, self.y = length-1, length-1
 
     def _getch(self, cmd) -> ',':
-        self.push(getch())
+        ch = getch()
+        if ch == '\r':
+            ch = ''
+        self.push(ch)
         self.move()
 
     def _repeat(self, cmd) -> '.':
