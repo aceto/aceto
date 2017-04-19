@@ -32,7 +32,7 @@ Without knowing the corresponding Hilbert curve, this can be hard to read. But
 when you put the code on top of a picture of a grade 2 Hilbert curve, it starts
 getting easier to understand at least the code flow:
 
-![Example code that prints "A6"](example_small.png)
+![Example code that prints "A6"](code_sample.png)
 
 First `3` and `7` are pushed on the stack, and added, which leaves a `10` on the
 stack. Next, a `6` is pushed and multiplied with the `10`, leaving a `60` on the
