@@ -174,7 +174,7 @@ class Aceto(object):
         self.move((self.x, self.y+1))
 
     def _down(self, cmd) -> 'vS':
-        if cmd.isalpha():
+        if cmd == 'S':
             self.code[self.x][self.y] = 'W'
         self.move((self.x-1, self.y))
 
