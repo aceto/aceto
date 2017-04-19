@@ -364,6 +364,18 @@ class Aceto(object):
         self.sid += 1
         self.move()
 
+    def _move_go_next_stack(self, cmd) -> ']':
+        x = self.pop()
+        self.sid += 1
+        self.push(x)
+        self.move()
+
+    def _move_go_prev_stack(self, cmd) -> '[':
+        x = self.pop()
+        self.sid -= 1
+        self.push(x)
+        self.move()
+
     def _negation(self, cmd) -> '!':
         self.push(not self.pop())
         self.move()
