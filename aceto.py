@@ -202,7 +202,7 @@ class Aceto(object):
             self.push(y**x)
             self.move()
         except TypeError:
-            raise CodeException(f"Can't raise {x!r} to the power of {y!r}")
+            raise CodeException(f"Can't raise {y!r} to the power of {x!r}")
 
     def _minus(self, cmd) -> '-':
         x = self.pop()
@@ -211,7 +211,7 @@ class Aceto(object):
             self.push(y-x)
             self.move()
         except TypeError:
-            raise CodeException(f"Can't subtract {y!r} from {x!r}")
+            raise CodeException(f"Can't subtract {x!r} from {y!r}")
 
     def _times(self, cmd) -> '*':
         x = self.pop()
@@ -229,7 +229,7 @@ class Aceto(object):
             self.push(y%x)
             self.move()
         except TypeError:
-            raise CodeException(f"Can't get modulo of {x!r} and {y!r}")
+            raise CodeException(f"Can't get modulo of {y!r} and {x!r}")
 
     def _div(self, cmd) -> '/':
         x = self.pop()
@@ -239,7 +239,7 @@ class Aceto(object):
         except ZeroDivisionError:
             raise CodeException("Zero division")
         except TypeError:
-            raise CodeException(f"Can't idivide {x!r} by {y!r}")
+            raise CodeException(f"Can't idivide {y!r} by {x!r}")
         self.move()
 
     def _floatdiv(self, cmd) -> ':':
@@ -250,7 +250,7 @@ class Aceto(object):
         except ZeroDivisionError:
             raise CodeException("Zero division")
         except TypeError:
-            raise CodeException(f"Can't fdivide {x!r} by {y!r}")
+            raise CodeException(f"Can't fdivide {y!r} by {x!r}")
         self.move()
 
     def _equals(self, cmd) -> '=':
@@ -293,6 +293,14 @@ class Aceto(object):
             self.push(int(x))
         except ValueError:
             raise CodeException(f"Can't cast {x!r} to int")
+        self.move()
+
+    def _bool(self, cmd) -> 'b':
+        x = self.pop()
+        try:
+            self.push(bool(x))
+        except ValueError:
+            raise CodeException(f"Can't cast {x!r} to bool")
         self.move()
 
     def _increment(self, cmd) -> 'I':
@@ -338,6 +346,12 @@ class Aceto(object):
     def _duplicate(self, cmd) -> 'd':
         x = self.pop()
         self.push(x)
+        self.push(x)
+        self.move()
+
+    def _head(self, cmd) -> 'h':
+        x = self.pop()
+        self.stacks[self.sid] = []
         self.push(x)
         self.move()
 
@@ -413,6 +427,10 @@ class Aceto(object):
         self.dir *= -1
         self.move()
 
+    def _reverse_stack(self, cmd) -> 'U': #reverse stack
+        self.stacks[self.sid].reverse()
+        self.move()
+
     def _string_literal(self, cmd) -> '"':
         self.mode = 'string'
         self.move()
@@ -423,6 +441,11 @@ class Aceto(object):
 
     def _escape(self, cmd) -> '\\':
         self.mode = 'escape'
+        self.move()
+
+    def _cond_escape(self, cmd) -> '`':
+        if not self.pop():
+            self.mode = 'escape'
         self.move()
 
     def _random_direction(self, cmd) -> '?':
@@ -443,7 +466,15 @@ class Aceto(object):
         self.move()
 
     def _invert(self, cmd) -> '~':
-        self.push(-self.pop())
+        x = self.pop()
+        if isinstance(x, bool):
+            self.push(not x)
+        elif isinstance(x, Number):
+            self.push(-x)
+        elif isinstance(x, str):
+            self.push(x[::-1])
+        else:
+            raise CodeException(f"Don't know how to invert {x!r}")
         self.move()
 
     def _restart(self, cmd) -> 'O':
@@ -463,6 +494,17 @@ class Aceto(object):
     def _repeat(self, cmd) -> '.':
         method = self.commands.get(self.previous_cmd, Aceto._nop)
         method(self, self.previous_cmd)
+
+    def _jump(self, cmd) -> 'j':
+        steps = self.pop()
+        distance = hilbert.distance_from_coordinates([self.y,self.x], self.p, N=2)
+        y, x = hilbert.coordinates_from_distance(distance+self.dir*steps, self.p, N=2)
+        self.x, self.y = x, y
+
+    def _join(self, cmd) -> 'J':
+        x, y = self.pop(), self.pop()
+        self.push(str(x) + str(y))
+        self.move()
 
     def _catch_mark(self, cmd) -> '@':
         self.catch_mark = self.x, self.y
@@ -487,6 +529,26 @@ class Aceto(object):
 
     def _drop(self, cmd) -> 'x':
         self.pop()
+        self.move()
+
+    def _contains(self, cmd) -> 'C':
+        x = self.pop()
+        self.push(x in self.stacks[self.sid])
+        self.move()
+
+    def _length(self, cmd) -> 'l':
+        self.push(len(self.stacks[self.sid]))
+        self.move()
+
+    def _queue(self, cmd) -> 'q':
+        self.stacks[self.sid].insert(self.pop())
+        self.move()
+
+    def _unqueue(self, cmd) -> 'Q':
+        try:
+            self.push(self.stacks[self.sid].pop(0))
+        except IndexError:
+            self.push(0)
         self.move()
 
 

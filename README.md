@@ -1,5 +1,5 @@
 # Aceto
-This is Aceto v1.2
+This is Aceto v1.3
 
 Aceto is a simple stack language that is based on a 2D Hilbert curve grid. The
 name is a reference to Aceto Balsamico (balsamic vinegar), and to
@@ -57,6 +57,7 @@ the stack end up removing it.
 - ` ` (a space): Do nothing. Any undefined character will also nop.
 - `s`: Swap the top two elements on the stack.
 - `d`: Pop a value and push it twice (duplicate).
+- `h`: Remove all values from the stack, except for the top (head).
 - `(`, `)`: Change the active stack to the left or right stack relative to the
   currently active stack.
 - `{`, `}`: Pop a value and push it on the stack to the left or right (but don't
@@ -65,6 +66,9 @@ the stack end up removing it.
 - `k`: Make the current stack "sticky", i.e. when popping from it the value is
   not removed, only copied.
 - `K`: Make the current stack unsticky again.
+- `U`: Reverse the current stack.
+- `q`: Pop an item and insert it at the bottom of the stack.
+- `Q`: Remove an item from the bottom of the stack and push it.
 - `X`: Exit the interpreter abruptly.
 - `x`: Pop a value and ignore it.
 
@@ -84,6 +88,10 @@ the stack end up removing it.
 - `$`: Pop a value and assert that it is truthy. Otherwise, raise an error.
 - `O`: Jump to the origin (0,0 or the bottom right cell, if the direction is
   reversed)
+- `j`: Pop a value and jump so many positions ahead. Also works with negative
+  numbers.
+- `` ` ``: Pops a value: If it's truthy, behaves like a space (nop), if not, like
+  a backslash (escape).
 
 ### Arithmetics and Comparisons
 - `+`, `-`, `*`, `%`: Perform that operation (`%` means modulo) with the top two
@@ -96,7 +104,9 @@ the stack end up removing it.
 - `I`: Pop a value, increment it, and push it.
 - `D`: Pop a value, decrement it, and push it.
 - `!`: Push the negation of a popped value.
-- `~`: Invert the popped element and push it.
+- `~`: Invert the popped element and push it. Will also negate booleans and reverse
+  strings.
+- `J`: Join the top two elements as a string.
 
 ### Literals
 - `0`, `1`, `2`, ..., `9`: Push that number on the active stack.
@@ -114,6 +124,7 @@ the stack end up removing it.
 - `i`: Pop a value, cast it to an integer (if possible, otherwise to 0), and put
 the result on the stack.
 - `f`: Like `i`, but with float.
+- `b`: Like `i`, but with bool.
 - `c`: Pop a value, convert it to the character of the unicode value and push
   it. If the value doesn't correspond to a unicode codepoint, push `U+FFFD`
   instead.
@@ -133,3 +144,6 @@ the result on the stack.
 - `T`: Set the global timestamp to now. It is initialized to the time of script
   start.
 - `t`: Push the difference between now and the global timestamp.
+- `C`: Pop a value and push a boolean: Whether the value is contained in the
+  current stack.
+- `l`: Push the length of the current stack.
