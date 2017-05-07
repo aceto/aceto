@@ -116,6 +116,7 @@ class Aceto(object):
         except IndexError:
             cmd = ' '  # nop
         self.log(1, cmd, end='') if cmd != ' ' else None
+        self.log(2, "\nMODE:", self.mode)
         if self.mode == 'command':
             method = self.commands.get(cmd, Aceto._nop)
             method(self, cmd)
@@ -146,6 +147,7 @@ class Aceto(object):
             self.move()
         elif self.mode == 'escape':
             self.move()
+            self.mode = 'command'
 
     def move(self, coords=None):
         if coords is not None:
@@ -482,7 +484,7 @@ class Aceto(object):
             self.x, self.y = 0, 0
         else:
             length = 2**self.p
-            self.x, self.y = length-1, length-1
+            self.x, self.y = 0, length-1
 
     def _getch(self, cmd) -> ',':
         ch = getch()
