@@ -1,5 +1,5 @@
 # Aceto
-This is Aceto v1.3
+This is Aceto v1.3.1
 
 Aceto is a simple stack language that is based on a 2D Hilbert curve grid. The
 name is a reference to Aceto Balsamico (balsamic vinegar), and to
@@ -50,100 +50,99 @@ prints the number `6` that is on the stack.
 
 ## Commands
 
-Unless otherwise specified, commands that perform an action with an element from
-the stack end up removing it.
+The colored marks generally mean that the number of elements in all stacks together is ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) increasing, ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) decreasing, or ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) staying the same. In sticky mode, or when stacks aren't sufficiently full, that can vary (for example, `+` is normally decreasing the total number of elements by 1, but increases them by one if the stack was empty before). There is currently one command where the impact on total number of elements is ![#f0e788](https://placehold.it/15/f0e788/000000?text=+) undefined, because it depends on the previous command.
 
 ### General
-- ` ` (a space): Do nothing. Any undefined character will also nop.
-- `s`: Swap the top two elements on the stack.
-- `d`: Pop a value and push it twice (duplicate).
-- `h`: Remove all values from the stack, except for the top (head).
-- `(`, `)`: Change the active stack to the left or right stack relative to the
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) ` ` (a space): Do nothing. Any undefined character will also nop.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `s`: Swap the top two elements on the stack.
+- ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `d`: Pop a value and push it twice (duplicate).
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `h`: Remove all values from the stack, except for the top (head).
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `(`, `)`: Change the active stack to the left or right stack relative to the
   currently active stack.
-- `{`, `}`: Pop a value and push it on the stack to the left or right (but don't
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `{`, `}`: Pop a value and push it on the stack to the left or right (but don't
   change which stack is active).
-- `[`, `]`: Pop a value, move a stack to the left or right, and push it again.
-- `k`: Make the current stack "sticky", i.e. when popping from it the value is
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `[`, `]`: Pop a value, move a stack to the left or right, and push it again.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `k`: Make the current stack "sticky", i.e. when popping from it the value is
   not removed, only copied.
-- `K`: Make the current stack unsticky again.
-- `U`: Reverse the current stack.
-- `q`: Pop an item and insert it at the bottom of the stack.
-- `Q`: Remove an item from the bottom of the stack and push it.
-- `X`: Exit the interpreter abruptly.
-- `x`: Pop a value and ignore it.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `K`: Make the current stack unsticky again.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `U`: Reverse the current stack.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `q`: Pop an item and insert it at the bottom of the stack.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `Q`: Remove an item from the bottom of the stack and push it.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `X`: Exit the interpreter abruptly.
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `x`: Pop a value and ignore it.
 
 ### Movement, Conditions, and Catching
-- `<`, `>`, `v`, `^`: Special commands that make the interpreter ignore the
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `<`, `>`, `v`, `^`: Special commands that make the interpreter ignore the
   shape of the Hilbert curve for this turn and instead move in the direction
   indicated by the character.
-- `W`, `E`, `S`, `N`: Like `<>v^`, but turn clockwise after execution.
-- `u`: Reverse the direction the IP is moving.
-- `?`: Move in a random direction.
-- `|`, `_`: Special commands that make the interpreter ignore the shape of the
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `W`, `E`, `S`, `N`: Like `<>v^`, but turn clockwise after execution.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `u`: Reverse the direction the IP is moving.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `?`: Move in a random direction.
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `|`, `_`: Special commands that make the interpreter ignore the shape of the
   Hilbert curve for this turn and instead move to the point on the grid mirrored
   vertically/horizontally, but only if the popped value is truthy.
-- `#`: Like `|`/`_`, but mirrors both vertically and horizontally.
-- `@`: Set the current cell to the catch cell. When a (normal) error occurs, jump here.
-- `&`: Manually raise an error.
-- `$`: Pop a value and assert that it is truthy. Otherwise, raise an error.
-- `O`: Jump to the origin (0,0 or the bottom right cell, if the direction is
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `#`: Like `|`/`_`, but mirrors both vertically and horizontally.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `@`: Set the current cell to the catch cell. When a (normal) error occurs, jump here.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `&`: Manually raise an error.
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `$`: Pop a value and assert that it is truthy. Otherwise, raise an error.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `O`: Jump to the origin (0,0 or the bottom right cell, if the direction is
   reversed)
-- `j`: Pop a value and jump so many positions ahead. Also works with negative
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `j`: Pop a value and jump so many positions ahead. Also works with negative
   numbers.
-- `` ` ``: Pops a value: If it's truthy, behaves like a space (nop), if not, like
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `` ` ``: Pops a value: If it's truthy, behaves like a space (nop), if not, like
   a backslash (escape).
 
 ### Arithmetics and Comparisons
-- `+`, `-`, `*`, `%`: Perform that operation (`%` means modulo) with the top two
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `+`, `-`, `*`, `%`: Perform that operation (`%` means modulo) with the top two
   elements of the stack. For operations where the order matters, the operation
   will take the top element on the stack as the second argument; i.e. `5`, `3`,
   `-` will leave a 2 on the stack, not a -2.
-- `/`, `:`: Perform division. `/` is integer division, `:` float division.
-- `=`: Take two elements a and b from the stack and put the result of `a==b` on
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `/`, `:`: Perform division. `/` is integer division, `:` float division.
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `=`: Take two elements a and b from the stack and put the result of `a==b` on
   the stack (a boolean value).
-- `I`: Pop a value, increment it, and push it.
-- `D`: Pop a value, decrement it, and push it.
-- `!`: Push the negation of a popped value.
-- `~`: Invert the popped element and push it. Will also negate booleans and reverse
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `I`: Pop a value, increment it, and push it.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `D`: Pop a value, decrement it, and push it.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `!`: Push the negation of a popped value.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `~`: Invert the popped element and push it. Will also negate booleans and reverse
   strings.
-- `J`: Join the top two elements as a string.
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `J`: Join the top two elements as a string.
 
 ### Literals
-- `0`, `1`, `2`, ..., `9`: Push that number on the active stack.
-- `"`: Starts a string literal. This works pretty much like in other languages.
+- ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `0`, `1`, `2`, ..., `9`: Push that number on the active stack.
+- ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `"`: Starts a string literal. This works pretty much like in other languages.
   String literals are terminated with another `"`, but escaping (with a
   backslash) works too. That means that `"\"Hello\\World\n" will result in
   `"Hello\World\n`, where the `\n` is a newline character (`\t` is also
   supported). The resulting string will be pushed on the active stack.
-- `'`: Starts a character literal. The next character will be pushed on the
+- ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `'`: Starts a character literal. The next character will be pushed on the
   stack as a string. Escaping (for `\n`, `\t`, and `\\`) also works, but not for
   `\'`, because `''` will already accomplish the desired effect (push a single
   quote character).
 
 ### Casting
-- `i`: Pop a value, cast it to an integer (if possible, otherwise to 0), and put
-the result on the stack.
-- `f`: Like `i`, but with float.
-- `b`: Like `i`, but with bool.
-- `c`: Pop a value, convert it to the character of the unicode value and push
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `i`: Pop a value, cast it to an integer (if possible, otherwise to 0), and put
+  the result on the stack.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `f`: Like `i`, but with float.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `b`: Like `i`, but with bool.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `c`: Pop a value, convert it to the character of the unicode value and push
   it. If the value doesn't correspond to a unicode codepoint, push `U+FFFD`
   instead.
-- `o`: The opposite of `c`; Pop a character and convert it to the number of its
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `o`: The opposite of `c`; Pop a character and convert it to the number of its
   unicode codepoint and push the result. When anything fails, push a 0 instead.
 
 ### I/O
-- `p`: Print the element on the stack.
-- `r`: Read a string from the user and put it on the stack.
-- `n`: Print a newline.
-- `,`: Get a single character (without requiring a newline).
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `p`: Print the element on the stack.
+- ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `r`: Read a string from the user and put it on the stack.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `n`: Print a newline.
+- ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `,`: Get a single character (without requiring a newline).
 
 ### Special
-- `\`: Escapes the next character: It will be ignored.
-- `P`, `e`, `R`: Push π, 𝑒, or a random float between 0 and 1.
-- `.`: Repeat the previous command.
-- `T`: Set the global timestamp to now. It is initialized to the time of script
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `\`: Escapes the next character: It will be ignored.
+- ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `P`, `e`, `R`: Push π, 𝑒, or a random float between 0 and 1.
+- ![#f0e788](https://placehold.it/15/f0e788/000000?text=+) `.`: Repeat the previous command.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `T`: Set the global timestamp to now. It is initialized to the time of script
   start.
-- `t`: Push the difference between now and the global timestamp.
-- `C`: Pop a value and push a boolean: Whether the value is contained in the
+- ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `t`: Push the difference between now and the global timestamp.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `C`: Pop a value and push a boolean: Whether the value is contained in the
   current stack.
-- `l`: Push the length of the current stack.
+- ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `l`: Push the length of the current stack.
