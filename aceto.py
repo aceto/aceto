@@ -17,6 +17,7 @@ import termios
 import time
 import shutil
 from math import ceil, log2
+from numbers import Number
 from collections import defaultdict
 from random import choice, random
 from math import e, pi
@@ -116,7 +117,7 @@ class Aceto(object):
         except IndexError:
             cmd = ' '  # nop
         self.log(1, cmd, end='') if cmd != ' ' else None
-        self.log(2, "\nMODE:", self.mode)
+        self.log(2, "\nActive stack:", self.stacks[self.sid])
         if self.mode == 'command':
             method = self.commands.get(cmd, Aceto._nop)
             method(self, cmd)
