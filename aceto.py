@@ -45,6 +45,7 @@ class Aceto(object):
         self.sticky = set()
         self.sid = 0
         self.buf = ''
+        self.quick = ''
         self.x, self.y = 0, 0
         self.verbosity = args['--verbose']
         self.flushness = args['--flush']
@@ -68,6 +69,7 @@ class Aceto(object):
             for line in reversed(f.readlines()):
                 self.code.append(list(line.rstrip("\n")))
         self.p = ceil(log2(max([len(self.code), max(len(line) for line in self.code)])))
+        self.s = 2**self.p
         self.x, self.y = 0, 0
         self.timestamp = time.time()
         self.catch_mark = None
@@ -168,22 +170,23 @@ class Aceto(object):
     def _left(self, cmd) -> '<W':
         if cmd == 'W':
             self.code[self.x][self.y] = 'N'
-        self.move((self.x, self.y-1))
+        self.move((self.x, (self.y-1)%self.s))
 
     def _right(self, cmd) -> '>E':
         if cmd == 'E':
             self.code[self.x][self.y] = 'S'
-        self.move((self.x, self.y+1))
+        self.move((self.x, (self.y+1%self.s)))
 
     def _down(self, cmd) -> 'vS':
         if cmd == 'S':
             self.code[self.x][self.y] = 'W'
-        self.move((self.x-1, self.y))
+        self.log(2, f"{self.s} From {self.x},{self.y} to {(self.x-1)%self.s}, {self.y}")
+        self.move(((self.x-1)%self.s, self.y))
 
     def _up(self, cmd) -> '^N':
         if cmd == 'N':
             self.code[self.x][self.y] = 'E'
-        self.move((self.x+1, self.y))
+        self.move(((self.x+1)%self.s, self.y))
 
     def _numeric(self, cmd) -> '1234567890':
         self.push(int(cmd))
@@ -554,6 +557,39 @@ class Aceto(object):
             self.push(0)
         self.move()
 
+    def _memorize_quick(self, cmd) -> 'M':
+        self.quick = self.pop()
+        self.move()
+
+    def _load_quick(self, cmd) -> 'L':
+        self.push(self.quick)
+        self.move()
+
+    def _more(self, cmd) -> 'm':
+        x = self.pop()
+        y = self.pop()
+        self.log(2, f"Testing if {y!r} > {x!r}")
+        self.push(y>x)
+        self.move()
+
+    def _less_or_equal(self, cmd) -> 'w':
+        x = self.pop()
+        y = self.pop()
+        self.log(2, f"Testing if {y!r} <= {x!r}")
+        self.push(y<=x)
+        self.move()
+
+    def _and(self, cmd) -> 'A':
+        x = self.pop()
+        y = self.pop()
+        self.push(y&x)
+        self.move()
+
+    def _or(self, cmd) -> 'V':
+        x = self.pop()
+        y = self.pop()
+        self.push(y|x)
+        self.move()
 
 
 def getch():
