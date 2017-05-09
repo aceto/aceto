@@ -25,7 +25,10 @@ a quick storage, which is persistent and can only hold one thing at a time.
 
 As an example, let's look at the following code:
 
-    5+24 *cp+ 6+ v 37 p
+    5+24
+    *cp+
+    6+ v
+    37 p
 
 Without knowing the corresponding Hilbert curve, this can be hard to read. But
 when you put the code on top of a picture of a grade 2 Hilbert curve, it starts
