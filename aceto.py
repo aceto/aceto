@@ -19,7 +19,7 @@ import shutil
 from math import ceil, log2
 from numbers import Number
 from collections import defaultdict
-from random import choice, random
+from random import choice, random, shuffle
 from math import e, pi
 from docopt import docopt
 from hilbert_curve import hilbert
@@ -487,6 +487,14 @@ class Aceto(object):
             raise CodeException(f"Don't know how to invert {x!r}")
         self.move()
 
+    def _bitwise_negate(self, cmd) -> 'a':
+        x = self.pop()
+        try:
+            self.push(~x)
+        except:
+            raise CodeException(f"Don't know how to invert {x!r}")
+        self.move()
+
     def _restart(self, cmd) -> 'O':
         if self.dir==1:
             self.x, self.y = 0, 0
@@ -590,19 +598,19 @@ class Aceto(object):
         self.push(y<=x)
         self.move()
 
-    def _and(self, cmd) -> 'A':
+    def _bitwise_and(self, cmd) -> 'A':
         x = self.pop()
         y = self.pop()
         self.push(y&x)
         self.move()
 
-    def _or(self, cmd) -> 'V':
+    def _bitwise_or(self, cmd) -> 'V':
         x = self.pop()
         y = self.pop()
         self.push(y|x)
         self.move()
 
-    def _xor(self, cmd) -> 'H':
+    def _bitwise_xor(self, cmd) -> 'H':
         x = self.pop()
         y = self.pop()
         self.push(y^x)
@@ -624,6 +632,29 @@ class Aceto(object):
         step = 1 if x>0 else -1
         for element in range(sign, x+sign, sign):
             self.push(element)
+        self.move()
+
+    def _order_up(self, cmd) -> 'G':
+        x = [self.pop(), self.pop()]
+        x.sort()
+        self.push(x.pop())
+        self.push(x.pop())
+        self.move()
+
+    def _order_down(self, cmd) -> 'g':
+        x = [self.pop(), self.pop()]
+        x.sort(reverse=True)
+        self.push(x.pop())
+        self.push(x.pop())
+        self.move()
+
+    def _shuffle(self, cmd) -> 'Y':
+        shuffle(self.stacks[self.sid])
+        self.move()
+
+    def _sign(self, cmd) -> 'y':
+        x = self.pop()
+        self.push(1 if x>0 else -1 if x<0 else 0)
         self.move()
 
 

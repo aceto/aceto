@@ -1,6 +1,6 @@
 # Aceto
 
-This is Aceto v1.5.0
+This is Aceto v1.6.0
 
 Aceto is a simple stack language that is based on a 2D Hilbert curve grid. The
 name is a reference to Aceto Balsamico (balsamic vinegar), and to
@@ -93,6 +93,8 @@ depends on the previous command.
   insert it at the bottom of the stack.
 - ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `Q`: Remove an item
   from the bottom of the stack and push it.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `Y`: Shuffle the
+  current stack.
 - ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `X`: Exit the
   interpreter abruptly.
 - ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `x`: Pop a value and
@@ -158,6 +160,9 @@ depends on the previous command.
   negation of a popped value.
 - ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `~`: Invert the
   popped element and push it. Will also negate booleans and reverse strings.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `y`: Push the sign of
+  a popped element (1 for positive numbers, -1 for negative numbers, 0
+  otherwise).
 - ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `A`: Take two
   elements a and b from the stack and put the result of `a&b` (bitwise AND) on
   the stack.
@@ -167,6 +172,8 @@ depends on the previous command.
 - ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `H`: Take two
   elements a and b from the stack and put the result of `a^b` (bitwise XOR) on
   the stack.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `a`: Push the result
+  of bitwise NOT of the popped element on the stack.
 - ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `J`: Join the top two
   elements as a string.
 
@@ -237,3 +244,7 @@ depends on the previous command.
   push an increasing range on the stack: A popped `5` will push `1`, `2`, `3`,
   `4`, `5`. Also works with negative numbers, in which case it will count down
   from `-1`.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `g`: Sort the top two
+  elements of the stack (ascending)
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `G`: Sort the top two
+  elements of the stack (descending)
