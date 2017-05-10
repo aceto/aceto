@@ -1,6 +1,6 @@
 # Aceto
 
-This is Aceto v1.4.0
+This is Aceto v1.5.0
 
 Aceto is a simple stack language that is based on a 2D Hilbert curve grid. The
 name is a reference to Aceto Balsamico (balsamic vinegar), and to
@@ -123,6 +123,8 @@ depends on the previous command.
   assert that it is truthy. Otherwise, raise an error.
 - ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `O`: Jump to the
   origin (0,0 or the bottom right cell, if the direction is reversed)
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `;`: Jump to the
+  end (the bottom right cell, or 0,0, if the direction is reversed).
 - ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `j`: Pop a value and
   jump so many positions ahead. Also works with negative numbers.
 - ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `` ` ``: Pops a
@@ -160,6 +162,9 @@ depends on the previous command.
 - ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `V`: Take two
   elements a and b from the stack and put the result of `a|b` (bitwise OR) on
   the stack.
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `H`: Take two
+  elements a and b from the stack and put the result of `a^b` (bitwise XOR) on
+  the stack.
 - ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `J`: Join the top two
   elements as a string.
 
@@ -195,6 +200,8 @@ depends on the previous command.
 ### I/O
 - ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `p`: Print the
   element on the stack.
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `B`: Print the
+  element in quick storage.
 - ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `r`: Read a string
   from the user and put it on the stack.
 - ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `n`: Print a newline.
@@ -220,3 +227,11 @@ depends on the previous command.
   of the quick memory (initially an empty string) and push it on the stack.
 - ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `M`: Pop a value and
   memorize it in the quick memory.
+- ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `z`: Pop a value and
+  push a decreasing range on the stack: A popped `5` will push `5`, `4`, `3`,
+  `2`, `1`. Also works with negative numbers, in which case it will count up to
+  `-1`.
+- ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `Z`: Pop a value and
+  push an increasing range on the stack: A popped `5` will push `1`, `2`, `3`,
+  `4`, `5`. Also works with negative numbers, in which case it will count down
+  from `-1`.

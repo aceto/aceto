@@ -270,6 +270,10 @@ class Aceto(object):
         print(self.pop(), end='', flush=self.flushness)
         self.move()
 
+    def _print_quick(self, cmd) -> 'B':
+        print(self.quick, end='', flush=self.flushness)
+        self.move()
+
     def _sticky_mode_on(self, cmd) -> 'k':
         self.sticky.add(self.sid)
         self.move()
@@ -490,6 +494,13 @@ class Aceto(object):
             length = 2**self.p
             self.x, self.y = 0, length-1
 
+    def _finalize(self, cmd) -> ';':
+        if self.dir==-1:
+            self.x, self.y = 0, 0
+        else:
+            length = 2**self.p
+            self.x, self.y = 0, length-1
+
     def _getch(self, cmd) -> ',':
         ch = getch()
         if ch == '\r':
@@ -589,6 +600,30 @@ class Aceto(object):
         x = self.pop()
         y = self.pop()
         self.push(y|x)
+        self.move()
+
+    def _xor(self, cmd) -> 'H':
+        x = self.pop()
+        y = self.pop()
+        self.push(y^x)
+        self.move()
+
+    def _range_down(self, cmd) -> 'z':
+        val = self.pop()
+        if not isinstance(val, int) or val == 0:
+            raise CodeException("Can only construct range with nonzero integer")
+        step = -1 if x>0 else 1
+        for element in range(x, 0, step):
+            self.push(element)
+        self.move()
+
+    def _range_up(self, cmd) -> 'Z':
+        val = self.pop()
+        if not isinstance(val, int) or val == 0:
+            raise CodeException("Can only construct range with nonzero integer")
+        step = 1 if x>0 else -1
+        for element in range(sign, x+sign, sign):
+            self.push(element)
         self.move()
 
 
