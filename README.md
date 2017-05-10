@@ -7,7 +7,9 @@ name is a reference to Aceto Balsamico (balsamic vinegar), and to
 [OIL](https://github.com/L3viathan/OIL). It was a birthday present for
 [@sarnthil](https://github.com/sarnthil).
 
-## Concept A program written in Aceto consists of a square grid of characters.
+## Concept
+
+A program written in Aceto consists of a square grid of characters.
 The side length of that square can be any power of two, although source files
 that aren't square will also work, as they will be transformed to one before
 execution.
