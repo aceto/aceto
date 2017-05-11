@@ -16,18 +16,21 @@ def str_to_hilbert(string):
 
 def hilbert_to_str(filename):
     code = []
-    with open(filename) as f:
-        for line in reversed(f.readlines()):
-            code.append(list(line.rstrip("\n")))
-    p = ceil(log2(max([len(code), max(len(line) for line in code)])))
-    sling = []
-    for i in range((2**p)**2):
-        y, x = hilbert.coordinates_from_distance(i, p, N=2)
-        try:
-            sling.append(code[x][y])
-        except IndexError:
-            sling.append(" ")
-    return "".join(sling).rstrip()
+    try:
+        with open(filename) as f:
+            for line in reversed(f.readlines()):
+                code.append(list(line.rstrip("\n")))
+        p = ceil(log2(max([len(code), max(len(line) for line in code)])))
+        sling = []
+        for i in range((2**p)**2):
+            y, x = hilbert.coordinates_from_distance(i, p, N=2)
+            try:
+                sling.append(code[x][y])
+            except IndexError:
+                sling.append(" ")
+        return "".join(sling).rstrip()
+    except FileNotFoundError:
+        return ""
 
 
 
@@ -52,7 +55,7 @@ if len(sys.argv) > 1:
     string = hilbert_to_str(sys.argv[1])
     if len(string) > 1:
         text.set_text(str_to_hilbert(string))
-    else:
+    elif len(string) == 1:
         text.set_text(string)
 
 filler = SolidFill(" ")
