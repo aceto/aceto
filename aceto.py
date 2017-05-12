@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Aceto - A language based on 2D hilbert curve grids
 
@@ -118,8 +119,9 @@ class Aceto(object):
             cmd = self.code[self.x][self.y]
         except IndexError:
             cmd = ' '  # nop
-        self.log(1, cmd, end='') if cmd != ' ' else None
-        self.log(2, "\nActive stack:", self.stacks[self.sid])
+        if cmd != ' ':
+            self.log(1, cmd, end='')
+            self.log(2, "\nActive stack:", self.stacks[self.sid])
         if self.mode == 'command':
             method = self.commands.get(cmd, Aceto._nop)
             method(self, cmd)

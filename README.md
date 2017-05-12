@@ -1,6 +1,6 @@
 # Aceto
 
-This is Aceto v1.6.0
+This is Aceto v1.6.1
 
 Aceto is a simple stack language that is based on a 2D Hilbert curve grid. The
 name is a reference to Aceto Balsamico (balsamic vinegar), and to
