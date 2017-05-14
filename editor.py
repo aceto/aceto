@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from urwid import MainLoop, SolidFill, ExitMainLoop, Edit, Overlay, Columns, Pile, Text, Filler, LineBox, BoxAdapter
 from hilbert_curve import hilbert
 from math import ceil, log2
