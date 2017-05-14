@@ -85,7 +85,7 @@ class Aceto(object):
                 self.step()
             except Exception as e:
                 if self.catch_mark is not None and not self.allerr:
-                    self.log(1, "Caught", e)
+                    self.log(2, "Caught", e)
                     self.x, self.y = self.catch_mark
                 else:
                     raise e
@@ -177,7 +177,7 @@ class Aceto(object):
     def _right(self, cmd) -> '>E':
         if cmd == 'E':
             self.code[self.x][self.y] = 'S'
-        self.move((self.x, (self.y+1%self.s)))
+        self.move((self.x, ((self.y+1)%self.s)))
 
     def _down(self, cmd) -> 'vS':
         if cmd == 'S':
@@ -461,7 +461,7 @@ class Aceto(object):
         self.move()
 
     def _random_direction(self, cmd) -> '?':
-        cmd_ = random.choice("v^<>")
+        cmd_ = choice("v^<>")
         method = self.commands.get(cmd_, Aceto._nop)
         method(self, cmd)
 
