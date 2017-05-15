@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""
+Balsamico — an Aceto editor
+"""
 from urwid import MainLoop, SolidFill, ExitMainLoop, Edit, Overlay, Columns, Pile, Text, Filler, LineBox, BoxAdapter
 from hilbert_curve import hilbert
 from math import ceil, log2
@@ -29,45 +32,51 @@ def hilbert_to_str(filename):
                 sling.append(code[x][y])
             except IndexError:
                 sling.append(" ")
-        return "".join(sling).rstrip()
+        return list("".join(sling).rstrip())
     except FileNotFoundError:
         return ""
 
 
-
-def quitter(key):
-    global string
+def keystroke(key):
+    global string, cursor
     if key in ('enter', 'ctrl d'):
         raise ExitMainLoop()
-    elif key=='backspace':
-        string = string[:-1]
+    elif key=='backspace' and string:
+        string.pop(cursor-1)
+        if cursor > 0:
+            cursor -= 1
+    elif key=='delete' and string and cursor < len(string):
+        string.pop(cursor)
+    elif key == 'left' and cursor > 0:
+        cursor -= 1
+    elif key == 'right' and cursor < len(string):
+        cursor += 1
+    elif len(key) > 1:
+        pass
     else:
-        string += key
+        string.insert(cursor, key)
+        cursor += 1
     if len(string) > 1:
         text.set_text(str_to_hilbert(string))
     else:
-        text.set_text(string)
+        text.set_text(''.join(string))
 
 text = Text("""Just start writing...
 
 The text will automatically align correctly. To exit, press Return.""")
-string = ""
+string = []
+cursor = 0
 if len(sys.argv) > 1:
     string = hilbert_to_str(sys.argv[1])
     if len(string) > 1:
         text.set_text(str_to_hilbert(string))
     elif len(string) == 1:
-        text.set_text(string)
+        text.set_text(''.join(string))
 
 filler = SolidFill(" ")
 overlay = Overlay(Filler(text), filler, "center", 40, "middle", 40)
 
-main = MainLoop(overlay, unhandled_input=quitter, palette=[
-    ('headings', 'white,underline', 'black', 'bold,underline'), # bold text in monochrome mode
-    ('body_text', 'dark cyan', 'light gray'),
-    ('buttons', 'yellow', 'dark green', 'standout'),
-    ('section_text', 'body_text'), # alias to body_text
-    ])
+main = MainLoop(overlay, unhandled_input=keystroke)
 main.run()
 
 print("Do you want to save the file? (Ctrl+C to abort)")
