@@ -8,12 +8,15 @@ from math import ceil, log2
 from collections import defaultdict
 import sys
 
-def str_to_hilbert(string):
+def str_to_hilbert(string, cursor=None):
     p = ceil(log2(len(string)**.5))
     d = defaultdict(lambda:defaultdict(str))
     for i, c in enumerate(string):
         y, x = hilbert.coordinates_from_distance(i, p, N=2)
-        d[x][y] = c
+        if cursor is not None and i == cursor:
+            d[x][y] = "∎"
+        else:
+            d[x][y] = c
     return "\n".join(
             "".join(d[y][x] for x in range(2**p)) for y in reversed(range(2**p))
             )
@@ -57,7 +60,7 @@ def keystroke(key):
         string.insert(cursor, key)
         cursor += 1
     if len(string) > 1:
-        text.set_text(str_to_hilbert(string))
+        text.set_text(str_to_hilbert(string, cursor))
     else:
         text.set_text(''.join(string))
 
