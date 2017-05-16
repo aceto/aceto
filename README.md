@@ -174,6 +174,9 @@ depends on the previous command.
   the stack.
 - ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `a`: Push the result
   of bitwise NOT of the popped element on the stack.
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `«`, `»`: Pop the top
+  element (x) and the next element (y), and push `y<<x` (for `«`) or `y>>x` (for
+  `»`).
 - ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `J`: Join the top two
   elements as a string.
 

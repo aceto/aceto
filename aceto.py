@@ -659,6 +659,18 @@ class Aceto(object):
         self.push(1 if x>0 else -1 if x<0 else 0)
         self.move()
 
+    def _bitwise_left(self, cmd) -> '«':
+        x = self.pop()
+        y = self.pop()
+        self.push(y<<x)
+        self.move()
+
+    def _bitwise_right(self, cmd) -> '»':
+        x = self.pop()
+        y = self.pop()
+        self.push(y>>x)
+        self.move()
+
 
 def getch():
     fd = sys.stdin.fileno()
