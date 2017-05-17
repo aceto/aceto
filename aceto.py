@@ -206,11 +206,17 @@ class Aceto(object):
     def _pow(self, cmd) -> 'F':
         x = self.pop()
         y = self.pop()
-        try:
-            self.push(y**x)
-            self.move()
-        except TypeError:
-            raise CodeException(f"Can't raise {y!r} to the power of {x!r}")
+        if isinstance(y, Number):
+            try:
+                self.push(y**x)
+                self.move()
+            except TypeError:
+                raise CodeException(f"Can't raise {y!r} to the power of {x!r}")
+        else:
+            try:
+                self.push(y[x])
+            except IndexError:
+                raise CodeException("Index out of range")
 
     def _minus(self, cmd) -> '-':
         x = self.pop()
@@ -674,7 +680,6 @@ class Aceto(object):
     def _multiply_stack(self, cmd) -> '×':
         x = self.pop()
         self.stacks[self.sid] *= x
-
         self.move()
 
 
