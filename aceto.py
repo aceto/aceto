@@ -659,9 +659,22 @@ class Aceto(object):
         self.push(1 if x>0 else -1 if x<0 else 0)
         self.move()
 
+
+    def _bitwise_left(self, cmd) -> '«':
+        x = self.pop()
+        y = self.pop()
+        self.push(y<<x)
+        self.move()
+
+    def _bitwise_right(self, cmd) -> '»':
+        x = self.pop()
+        y = self.pop()
+        self.push(y>>x)
+
     def _multiply_stack(self, cmd): -> '×':
         x = self.pop()
         self.stacks[self.sid] *= x
+
         self.move()
 
 
