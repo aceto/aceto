@@ -671,7 +671,7 @@ class Aceto(object):
         y = self.pop()
         self.push(y>>x)
 
-    def _multiply_stack(self, cmd): -> '×':
+    def _multiply_stack(self, cmd) -> '×':
         x = self.pop()
         self.stacks[self.sid] *= x
 
