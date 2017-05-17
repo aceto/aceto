@@ -659,6 +659,11 @@ class Aceto(object):
         self.push(1 if x>0 else -1 if x<0 else 0)
         self.move()
 
+    def _multiply_stack(self, cmd): -> '×':
+        x = self.pop()
+        self.stacks[self.sid] *= x
+        self.move()
+
 
 def getch():
     fd = sys.stdin.fileno()

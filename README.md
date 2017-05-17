@@ -248,3 +248,5 @@ depends on the previous command.
   elements of the stack (ascending)
 - ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `G`: Sort the top two
   elements of the stack (descending)
+- ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `×`: Multiply the
+  stack by the top element (`[1,2,3]` becomes `[1,2,1,2,1,2]`).
