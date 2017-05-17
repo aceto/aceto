@@ -682,6 +682,16 @@ class Aceto(object):
         self.stacks[self.sid] *= x
         self.move()
 
+    def _explode_string(self, cmd) -> '€':
+        x = self.pop()
+        self.stacks[self.sid].extend(reversed(x))
+        self.move()
+
+    def _implode_string(self, cmd) -> '¥':
+        s = ''.join(str(element) for element in self.stacks[self.sid]):w
+        self.stacks[self.sid] = [s]
+        self.move()
+
 
 def getch():
     fd = sys.stdin.fileno()
