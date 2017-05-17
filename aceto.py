@@ -321,6 +321,14 @@ class Aceto(object):
             raise CodeException(f"Can't cast {x!r} to bool")
         self.move()
 
+    def _string(self, cmd) -> '∑':
+        x = self.pop()
+        try:
+            self.push(str(x))
+        except ValueError:
+            raise CodeException(f"Can't cast {x!r} to string")
+        self.move()
+
     def _increment(self, cmd) -> 'I':
         x = self.pop()
         try:
