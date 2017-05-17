@@ -215,6 +215,8 @@ depends on the previous command.
   with float.
 - ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `b`: Like `i`, but
   with bool.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `∑`: Like `i`, but
+  with string.
 - ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `c`: Pop a value,
   convert it to the character of the unicode value and push it. If the value
   doesn't correspond to a unicode codepoint, push `U+FFFD` instead.
