@@ -209,7 +209,6 @@ class Aceto(object):
         if isinstance(y, Number):
             try:
                 self.push(y**x)
-                self.move()
             except TypeError:
                 raise CodeException(f"Can't raise {y!r} to the power of {x!r}")
         else:
@@ -217,6 +216,7 @@ class Aceto(object):
                 self.push(y[x])
             except IndexError:
                 raise CodeException("Index out of range")
+        self.move()
 
     def _minus__split1(self, cmd) -> '-':
         x = self.pop()
@@ -224,12 +224,12 @@ class Aceto(object):
             y = self.pop()
             try:
                 self.push(y-x)
-                self.move()
             except TypeError:
                 raise CodeException(f"Can't subtract {x!r} from {y!r}")
         else:
             for element in reversed(x.split()):
                 self.push(element)
+        self.move()
 
     def _times(self, cmd) -> '*':
         x = self.pop()
@@ -270,11 +270,11 @@ class Aceto(object):
                 raise CodeException("Zero division")
             except TypeError:
                 raise CodeException(f"Can't fdivide {y!r} by {x!r}")
-            self.move()
         else:
             y = self.pop()
             for element in reversed(y.split(x)):
                 self.push(element)
+        self.move()
 
     def _equals(self, cmd) -> '=':
         x = self.pop()
