@@ -203,7 +203,7 @@ class Aceto(object):
         except TypeError:
             raise CodeException(f"Can't add {x!r} to {y!r}")
 
-    def _pow(self, cmd) -> 'F':
+    def _pow__find_char(self, cmd) -> 'F':
         x = self.pop()
         y = self.pop()
         if isinstance(y, Number):
@@ -218,14 +218,17 @@ class Aceto(object):
             except IndexError:
                 raise CodeException("Index out of range")
 
-    def _minus(self, cmd) -> '-':
+    def _minus__split1(self, cmd) -> '-':
         x = self.pop()
-        y = self.pop()
-        try:
-            self.push(y-x)
-            self.move()
-        except TypeError:
-            raise CodeException(f"Can't subtract {x!r} from {y!r}")
+        if isinstance(x, Number):
+            y = self.pop()
+            try:
+                self.push(y-x)
+                self.move()
+            except TypeError:
+                raise CodeException(f"Can't subtract {x!r} from {y!r}")
+        else:
+            self.push(x.split())
 
     def _times(self, cmd) -> '*':
         x = self.pop()
@@ -256,16 +259,20 @@ class Aceto(object):
             raise CodeException(f"Can't idivide {y!r} by {x!r}")
         self.move()
 
-    def _floatdiv(self, cmd) -> ':':
+    def _floatdiv__split2(self, cmd) -> ':':
         x = self.pop()
-        y = self.pop()
-        try:
-            self.push(y/x)
-        except ZeroDivisionError:
-            raise CodeException("Zero division")
-        except TypeError:
-            raise CodeException(f"Can't fdivide {y!r} by {x!r}")
-        self.move()
+        if isinstance(x, Number):
+            y = self.pop()
+            try:
+                self.push(y/x)
+            except ZeroDivisionError:
+                raise CodeException("Zero division")
+            except TypeError:
+                raise CodeException(f"Can't fdivide {y!r} by {x!r}")
+            self.move()
+        else:
+            y = self.pop()
+            self.push(y.split(x))
 
     def _equals(self, cmd) -> '=':
         x = self.pop()
