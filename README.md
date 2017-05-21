@@ -209,6 +209,11 @@ depends on the previous command.
   on whitespace.
 - ![#f0e788](https://placehold.it/15/c5f015/000000?text=+) `:`: Split a string
   on another string (`['foo,bar,bat', ',']` → `['bat', 'bar', 'foo']`).
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `/`: Push the number
+  of regex matches of the first popped value in the second.
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `%`: Push the third
+  popped value, but with all instances of the regex in the second popped value
+  replaced with the first popped value.
 
 ### Casting
 - ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `i`: Pop a value,
