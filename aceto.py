@@ -228,7 +228,8 @@ class Aceto(object):
             except TypeError:
                 raise CodeException(f"Can't subtract {x!r} from {y!r}")
         else:
-            self.push(x.split())
+            for element in reversed(x.split()):
+                self.push(element)
 
     def _times(self, cmd) -> '*':
         x = self.pop()
@@ -272,7 +273,8 @@ class Aceto(object):
             self.move()
         else:
             y = self.pop()
-            self.push(y.split(x))
+            for element in reversed(y.split(x)):
+                self.push(element)
 
     def _equals(self, cmd) -> '=':
         x = self.pop()
