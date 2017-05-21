@@ -176,7 +176,7 @@ depends on the previous command.
   element (x) and the next element (y), and push `y<<x` (for `«`) or `y>>x` (for
   `»`).
 - ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `F`: Raise the second
-  popped number by the power of the first. Also gets characters from strings.
+  popped number by the power of the first.
 
 ### Literals
 - ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `0`, `1`, `2`, ...,
@@ -199,13 +199,16 @@ depends on the previous command.
   on top of the stack. Will also negate booleans and invert integers.
 - ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `F`: Pop an integer,
   then a string. Push `that_string[that_integer]`.
-  Also does exponentiation.
 - ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `¥`: Implode a
   string: Replace the stack with all of its elements, joined by empty spaces,
   casted to strings, top to bottom.
 - ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `€`: Explode a
   string: Pop a string, and push all of its characters in reverse (such that the
   top stack element will be the first character).
+- ![#f0e788](https://placehold.it/15/c5f015/000000?text=+) `-`: Split a string
+  on whitespace.
+- ![#f0e788](https://placehold.it/15/c5f015/000000?text=+) `:`: Split a string
+  on another string (`['foo,bar,bat', ',']` → `['bat', 'bar', 'foo']`).
 
 ### Casting
 - ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `i`: Pop a value,
