@@ -205,10 +205,17 @@ depends on the previous command.
 - ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `€`: Explode a
   string: Pop a string, and push all of its characters in reverse (such that the
   top stack element will be the first character).
-- ![#f0e788](https://placehold.it/15/c5f015/000000?text=+) `-`: Split a string
+- ![#f0e788](https://placehold.it/15/f0e788/000000?text=+) `-`: Split a string
   on whitespace.
-- ![#f0e788](https://placehold.it/15/c5f015/000000?text=+) `:`: Split a string
+- ![#f0e788](https://placehold.it/15/f0e788/000000?text=+) `:`: Split a string
   on another string (`['foo,bar,bat', ',']` → `['bat', 'bar', 'foo']`).
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `/`: Push the number
+  of regex matches of the first popped value in the second.
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `%`: Push the third
+  popped value, but with all instances of the regex in the second popped value
+  replaced with the first popped value.
+- ![#f0e788](https://placehold.it/15/f0e788/000000?text=+) `a`: Push all
+  matching strings of the first popped element in the second popped element.
 
 ### Casting
 - ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `i`: Pop a value,

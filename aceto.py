@@ -95,6 +95,10 @@ class Aceto(object):
     def push(self, thing):
         self.stacks[self.sid].append(thing)
 
+    def pushiter(self, iterable):
+        for element in iterable:
+            self.push(element)
+
     def pop(self):
         try:
             x = self.stacks[self.sid][-1]
@@ -229,8 +233,7 @@ class Aceto(object):
             except TypeError:
                 raise CodeException(f"Can't subtract {x!r} from {y!r}")
         else:
-            for element in reversed(x.split()):
-                self.push(element)
+            self.pushiter(reversed(x.split()))
         self.move()
 
     def _times(self, cmd) -> '*':
@@ -242,24 +245,31 @@ class Aceto(object):
         except TypeError:
             raise CodeException(f"Can't multiply {x!r} with {y!r}")
 
-    def _mod(self, cmd) -> '%':
+    def _mod__re_replace(self, cmd) -> '%':
         x = self.pop()
         y = self.pop()
-        try:
-            self.push(y%x)
-            self.move()
-        except TypeError:
-            raise CodeException(f"Can't get modulo of {y!r} and {x!r}")
+        if isinstance(x, Number):
+            try:
+                self.push(y%x)
+            except TypeError:
+                raise CodeException(f"Can't get modulo of {y!r} and {x!r}")
+        else:
+            z = self.pop()
+            self.push(re.sub(y, z, x))
+        self.move()
 
-    def _div(self, cmd) -> '/':
+    def _div__re_matches(self, cmd) -> '/':
         x = self.pop()
         y = self.pop()
-        try:
-            self.push(y//x)
-        except ZeroDivisionError:
-            raise CodeException("Zero division")
-        except TypeError:
-            raise CodeException(f"Can't idivide {y!r} by {x!r}")
+        if isinstance(x, Number):
+            try:
+                self.push(y//x)
+            except ZeroDivisionError:
+                raise CodeException("Zero division")
+            except TypeError:
+                raise CodeException(f"Can't idivide {y!r} by {x!r}")
+        else:
+            self.push(len(re.findall(y, x)))
         self.move()
 
     def _floatdiv__split2(self, cmd) -> ':':
@@ -274,8 +284,7 @@ class Aceto(object):
                 raise CodeException(f"Can't fdivide {y!r} by {x!r}")
         else:
             y = self.pop()
-            for element in reversed(y.split(x)):
-                self.push(element)
+            self.pushiter(reversed(y.split(x)))
         self.move()
 
     def _equals(self, cmd) -> '=':
@@ -516,10 +525,14 @@ class Aceto(object):
 
     def _bitwise_negate(self, cmd) -> 'a':
         x = self.pop()
-        try:
-            self.push(~x)
-        except:
-            raise CodeException(f"Don't know how to invert {x!r}")
+        if isinstance(x, Number):
+            try:
+                self.push(~x)
+            except:
+                raise CodeException(f"Don't know how to invert {x!r}")
+        else:
+            y = self.pop()
+            self.pushiter(reversed(re.findall(y, x)))
         self.move()
 
     def _restart(self, cmd) -> 'O':
@@ -648,8 +661,7 @@ class Aceto(object):
         if not isinstance(val, int) or val == 0:
             raise CodeException("Can only construct range with nonzero integer")
         step = -1 if x>0 else 1
-        for element in range(x, 0, step):
-            self.push(element)
+        self.pushiter(range(x, 0, step))
         self.move()
 
     def _range_up(self, cmd) -> 'Z':
@@ -657,8 +669,7 @@ class Aceto(object):
         if not isinstance(val, int) or val == 0:
             raise CodeException("Can only construct range with nonzero integer")
         step = 1 if x>0 else -1
-        for element in range(sign, x+sign, sign):
-            self.push(element)
+        self.pushiter(range(sign, x+sign, sign)
         self.move()
 
     def _order_up(self, cmd) -> 'G':
