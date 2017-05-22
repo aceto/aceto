@@ -6,9 +6,10 @@ Usage:
     aceto.py [-v ...] [options] [<filename> ...]
 
 Options:
-    -v --verbose    Be verbose. Can be specified several times.
-    -F --flush      Always flush after printing.
-    -e --err-all    Ignore catch marks (@) and always error out
+    -v --verbose       Be verbose. Can be specified several times.
+    -F --flush         Always flush after printing.
+    -e --err-all       Ignore catch marks (@) and always error out
+    -w --windows-1252  Use Windows-1252 instead of UTF-8
 """
 import sys
 import os
@@ -51,6 +52,7 @@ class Aceto(object):
         self.verbosity = args['--verbose']
         self.flushness = args['--flush']
         self.allerr = args['--err-all']
+        self.encoding = 'cp1252' if args['--windows-1252'] else 'utf-8'
         # annotate this!
         self.commands = {}
         d = type(self).__dict__
@@ -66,7 +68,7 @@ class Aceto(object):
 
     def load_code(self, filename):
         self.code = []
-        with open(filename) as f:
+        with open(filename, encoding=self.encoding) as f:
             for line in reversed(f.readlines()):
                 self.code.append(list(line.rstrip("\n")))
         self.p = ceil(log2(max([len(self.code), max(len(line) for line in self.code)])))
