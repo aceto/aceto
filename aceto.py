@@ -669,7 +669,7 @@ class Aceto(object):
         if not isinstance(val, int) or val == 0:
             raise CodeException("Can only construct range with nonzero integer")
         step = 1 if x>0 else -1
-        self.pushiter(range(sign, x+sign, sign)
+        self.pushiter(range(sign, x+sign, sign))
         self.move()
 
     def _order_up(self, cmd) -> 'G':
