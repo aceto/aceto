@@ -18,6 +18,7 @@ import tty
 import termios
 import time
 import shutil
+import re
 from math import ceil, log2
 from numbers import Number
 from collections import defaultdict
