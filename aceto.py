@@ -560,6 +560,10 @@ class Aceto(object):
         method = self.commands.get(self.previous_cmd, Aceto._nop)
         method(self, self.previous_cmd)
 
+    def _empty_stack(self, cmd) -> 'ø':
+        self.stack[self.sid] = []
+        self.move()
+
     def _jump(self, cmd) -> 'j':
         steps = self.pop()
         distance = hilbert.distance_from_coordinates([self.y,self.x], self.p, N=2)
