@@ -18,6 +18,7 @@ import tty
 import termios
 import time
 import shutil
+import re
 from math import ceil, log2
 from numbers import Number
 from collections import defaultdict
@@ -325,7 +326,7 @@ class Aceto(object):
         self.push(y)
         self.move()
 
-    def _int(self, cmd) -> 'i':
+    def _cast_int(self, cmd) -> 'i':
         x = self.pop()
         try:
             self.push(int(x))
@@ -333,7 +334,7 @@ class Aceto(object):
             raise CodeException(f"Can't cast {x!r} to int")
         self.move()
 
-    def _bool(self, cmd) -> 'b':
+    def _cast_bool(self, cmd) -> 'b':
         x = self.pop()
         try:
             self.push(bool(x))
@@ -341,7 +342,7 @@ class Aceto(object):
             raise CodeException(f"Can't cast {x!r} to bool")
         self.move()
 
-    def _string(self, cmd) -> '∑':
+    def _cast_string(self, cmd) -> '∑':
         x = self.pop()
         try:
             self.push(str(x))
@@ -381,7 +382,7 @@ class Aceto(object):
             self.push(0)
         self.move()
 
-    def _float(self, cmd) -> 'f':
+    def _cast_float(self, cmd) -> 'f':
         x = self.pop()
         try:
             self.push(float(x))
@@ -560,10 +561,20 @@ class Aceto(object):
         method = self.commands.get(self.previous_cmd, Aceto._nop)
         method(self, self.previous_cmd)
 
+    def _empty_stack(self, cmd) -> 'ø':
+        self.stack[self.sid] = []
+        self.move()
+
     def _jump(self, cmd) -> 'j':
         steps = self.pop()
         distance = hilbert.distance_from_coordinates([self.y,self.x], self.p, N=2)
         y, x = hilbert.coordinates_from_distance(distance+self.dir*steps, self.p, N=2)
+        self.x, self.y = x, y
+
+    def _goto(self, cmd) -> '§':
+        distance = self.pop()
+        #TODO: should take the direction (self.dir) into account.
+        y, x = hilbert.coordinates_from_distance(distance, self.p, N=2)
         self.x, self.y = x, y
 
     def _join(self, cmd) -> 'J':
@@ -584,12 +595,16 @@ class Aceto(object):
         else:
             self.move()
 
-    def _get_time(self, cmd) -> 't':
+    def _get_stopwatch(self, cmd) -> 't':
         self.push(time.time()-self.timestamp)
         self.move()
 
-    def _set_time(self, cmd) -> 'T':
+    def _set_stopwatch(self, cmd) -> 'T':
         self.timestamp = time.time()
+        self.move()
+
+    def _get_datetime(self, cmd) -> '™':
+        self.pushiter([*time.localtime()][:6][::-1])
         self.move()
 
     def _drop(self, cmd) -> 'x':
@@ -706,10 +721,16 @@ class Aceto(object):
         x = self.pop()
         y = self.pop()
         self.push(y>>x)
+        self.move()
 
     def _multiply_stack(self, cmd) -> '×':
         x = self.pop()
         self.stacks[self.sid] *= x
+        self.move()
+
+    def _abs(self, cmd) -> '±':
+        x = self.pop()
+        self.push(abs(x))
         self.move()
 
     def _explode_string(self, cmd) -> '€':
@@ -747,13 +768,20 @@ if __name__ == '__main__':
     if not args['<filename>']:
         cols, _ = shutil.get_terminal_size((80, 20))
         info = [f'{c} {f.__name__[1:]}' for c, f in A.commands.items()]
+        info.sort()
         maxlen = max(len(x) for x in info) + 1
         columns = cols // maxlen
         iinfo = iter(info)
+        end_character = '' if sys.stdout.isatty() else '\n'
         try:
             while True:
                 for _ in range(columns):
-                    print(next(iinfo).ljust(maxlen), end='')
-                print()
+                    item = next(iinfo)
+                    # skip all numbers except for 0
+                    while any(item.startswith(x) for x in "123456789"):
+                        item = next(iinfo)
+                    print(item.ljust(maxlen), end=end_character)
+                if not end_character:
+                    print()
         except StopIteration:
             print()

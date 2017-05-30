@@ -1,6 +1,6 @@
 # Aceto
 
-Aceto is a simple stack language that is based on a 2D Hilbert curve grid. The
+Aceto ([aˈtʃeto]) is a simple stack language that is based on a 2D Hilbert curve grid. The
 name is a reference to Aceto Balsamico (balsamic vinegar), and to
 [OIL](https://github.com/L3viathan/OIL). It was a birthday present for
 [@sarnthil](https://github.com/sarnthil).
@@ -97,6 +97,8 @@ depends on the previous command.
   interpreter abruptly.
 - ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `x`: Pop a value and
   ignore it.
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `ø`: Empty the
+  current stack.
 
 ### Movement, Conditions, and Catching
 - ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `<`, `>`, `v`, `^`:
@@ -129,6 +131,8 @@ depends on the previous command.
   end (the bottom right cell, or 0,0, if the direction is reversed).
 - ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `j`: Pop a value and
   jump so many positions ahead. Also works with negative numbers.
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `§`: Pop a value and
+  jump to the absolute position of that value.
 - ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `` ` ``: Pops a
   value: If it's truthy, behaves like a space (nop), if not, like a backslash
   (escape).
@@ -177,6 +181,8 @@ depends on the previous command.
   `»`).
 - ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `F`: Raise the second
   popped number by the power of the first.
+- ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `±`: Push the
+  absolute value of a popped value.
 
 ### Literals
 - ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `0`, `1`, `2`, ...,
@@ -256,6 +262,8 @@ depends on the previous command.
   timestamp to now. It is initialized to the time of script start.
 - ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `t`: Push the
   difference between now and the global timestamp.
+- ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `™`: Push a local,
+  datetime on the stack (year, month, day, hour, minute, second).
 - ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `C`: Pop a value and
   push a boolean: Whether the value is contained in the current stack.
 - ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `l`: Push the length
