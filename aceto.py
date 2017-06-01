@@ -20,11 +20,10 @@ import termios
 import time
 import shutil
 import re
-from math import ceil, log2
+from math import ceil, log2, pi, e as euler
 from numbers import Number
 from collections import defaultdict
 from random import choice, random, shuffle
-from math import e, pi
 from docopt import docopt
 from hilbert_curve import hilbert
 
@@ -38,6 +37,7 @@ class colors(object):
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+
 
 class CodeException(Exception):
     pass
@@ -78,7 +78,11 @@ class Aceto(object):
         with open(filename, encoding=self.encoding) as f:
             for line in reversed(f.readlines()):
                 self.code.append(list(line.rstrip("\n")))
-        self.p = ceil(log2(max([len(self.code), max(len(line) for line in self.code)])))
+        self.p = ceil(
+                log2(
+                    max([len(self.code), max(len(line) for line in self.code)])
+                    )
+                )
         self.s = 2**self.p
         self.x, self.y = 0, 0
         self.timestamp = time.time()
@@ -123,8 +127,16 @@ class Aceto(object):
 
     def next_coord(self):
         """Return the next coordinate"""
-        distance = hilbert.distance_from_coordinates([self.y,self.x], self.p, N=2)
-        y, x = hilbert.coordinates_from_distance(distance+self.dir, self.p, N=2)
+        distance = hilbert.distance_from_coordinates(
+                [self.y, self.x],
+                self.p,
+                N=2,
+                )
+        y, x = hilbert.coordinates_from_distance(
+                distance+self.dir,
+                self.p,
+                N=2,
+                )
         return x, y
 
     def step(self):
@@ -171,11 +183,11 @@ class Aceto(object):
         if coords is not None:
             x, y = coords
         else:
-            if self.dir == -1 and (0,0) == (self.x, self.y):
+            if self.dir == -1 and (0, 0) == (self.x, self.y):
                 x, y = -1, -1
             else:
                 x, y = self.next_coord()
-        if x >= 2**self.p or y>= 2**self.p or x < 0 or y < 0:
+        if x >= 2 ** self.p or y >= 2 ** self.p or x < 0 or y < 0:
             sys.exit()
         self.x, self.y = x, y
 
@@ -185,23 +197,27 @@ class Aceto(object):
     def _left(self, cmd) -> '<W':
         if cmd == 'W':
             self.code[self.x][self.y] = 'N'
-        self.move((self.x, (self.y-1)%self.s))
+        self.move((self.x, (self.y-1) % self.s))
 
     def _right(self, cmd) -> '>E':
         if cmd == 'E':
             self.code[self.x][self.y] = 'S'
-        self.move((self.x, ((self.y+1)%self.s)))
+        self.move((self.x, ((self.y+1) % self.s)))
 
     def _down(self, cmd) -> 'vS':
         if cmd == 'S':
             self.code[self.x][self.y] = 'W'
-        self.log(2, f"{self.s} From {self.x},{self.y} to {(self.x-1)%self.s}, {self.y}")
-        self.move(((self.x-1)%self.s, self.y))
+        self.log(
+              2,
+              f"{self.s} From {self.x},{self.y} to "
+              f"{(self.x-1) % self.s}, {self.y}",
+             )
+        self.move(((self.x-1) % self.s, self.y))
 
     def _up(self, cmd) -> '^N':
         if cmd == 'N':
             self.code[self.x][self.y] = 'E'
-        self.move(((self.x+1)%self.s, self.y))
+        self.move(((self.x+1) % self.s, self.y))
 
     def _numeric(self, cmd) -> '1234567890':
         self.push(int(cmd))
@@ -257,7 +273,7 @@ class Aceto(object):
         y = self.pop()
         if isinstance(x, Number):
             try:
-                self.push(y%x)
+                self.push(y % x)
             except TypeError:
                 raise CodeException(f"Can't get modulo of {y!r} and {x!r}")
         else:
@@ -298,7 +314,7 @@ class Aceto(object):
         x = self.pop()
         y = self.pop()
         self.log(2, f"Testing equality of {x!r} and {y!r}")
-        self.push(y==x)
+        self.push(y == x)
         self.move()
 
     def _print(self, cmd) -> 'p':
@@ -360,7 +376,7 @@ class Aceto(object):
         x = self.pop()
         try:
             self.push(x+1)
-        except:
+        except Exception:
             self.push(1)
         self.move()
 
@@ -368,7 +384,7 @@ class Aceto(object):
         x = self.pop()
         try:
             self.push(x-1)
-        except:
+        except Exception:
             self.push(1)
         self.move()
 
@@ -376,7 +392,7 @@ class Aceto(object):
         x = self.pop()
         try:
             self.push(chr(x))
-        except:
+        except Exception:
             self.push('\ufffd')
         self.move()
 
@@ -384,7 +400,7 @@ class Aceto(object):
         x = self.pop()
         try:
             self.push(ord(x))
-        except:
+        except Exception:
             self.push(0)
         self.move()
 
@@ -392,7 +408,7 @@ class Aceto(object):
         x = self.pop()
         try:
             self.push(float(x))
-        except:
+        except Exception:
             self.push(0)
         self.move()
 
@@ -453,7 +469,14 @@ class Aceto(object):
         cond = self.pop()
         if cond:
             new_pos = (self.x, 2**self.p-(self.y+1))
-            self.log(2, "Mirroring horizontally from", self.x, self.y, "to", new_pos)
+            self.log(
+                    2,
+                    "Mirroring horizontally from",
+                    self.x,
+                    self.y,
+                    "to",
+                    new_pos,
+                    )
             self.move(new_pos)
         else:
             self.move()
@@ -462,7 +485,14 @@ class Aceto(object):
         cond = self.pop()
         if cond:
             new_pos = (2**self.p-(self.x+1), self.y)
-            self.log(2, "Mirroring vertically from", self.x, self.y, "to", new_pos)
+            self.log(
+                    2,
+                    "Mirroring vertically from",
+                    self.x,
+                    self.y,
+                    "to",
+                    new_pos,
+                    )
             self.move(new_pos)
         else:
             self.move()
@@ -476,11 +506,11 @@ class Aceto(object):
         else:
             self.move()
 
-    def _reverse(self, cmd) -> 'u': #reverse direction
+    def _reverse(self, cmd) -> 'u':  # reverse direction
         self.dir *= -1
         self.move()
 
-    def _reverse_stack(self, cmd) -> 'U': #reverse stack
+    def _reverse_stack(self, cmd) -> 'U':  # reverse stack
         self.stacks[self.sid].reverse()
         self.move()
 
@@ -515,7 +545,7 @@ class Aceto(object):
         self.move()
 
     def _euler(self, cmd) -> 'e':
-        self.push(pi)
+        self.push(euler)
         self.move()
 
     def _invert(self, cmd) -> '~':
@@ -535,7 +565,7 @@ class Aceto(object):
         if isinstance(x, Number):
             try:
                 self.push(~x)
-            except:
+            except Exception:
                 raise CodeException(f"Don't know how to invert {x!r}")
         else:
             y = self.pop()
@@ -543,14 +573,14 @@ class Aceto(object):
         self.move()
 
     def _restart(self, cmd) -> 'O':
-        if self.dir==1:
+        if self.dir == 1:
             self.x, self.y = 0, 0
         else:
-            length = 2**self.p
-            self.x, self.y = 0, length-1
+            length = 2 ** self.p
+            self.x, self.y = 0, length - 1
 
     def _finalize(self, cmd) -> ';':
-        if self.dir==-1:
+        if self.dir == -1:
             self.x, self.y = 0, 0
         else:
             length = 2**self.p
@@ -573,13 +603,21 @@ class Aceto(object):
 
     def _jump(self, cmd) -> 'j':
         steps = self.pop()
-        distance = hilbert.distance_from_coordinates([self.y,self.x], self.p, N=2)
-        y, x = hilbert.coordinates_from_distance(distance+self.dir*steps, self.p, N=2)
+        distance = hilbert.distance_from_coordinates(
+                [self.y, self.x],
+                self.p,
+                N=2,
+                )
+        y, x = hilbert.coordinates_from_distance(
+                distance + self.dir * steps,
+                self.p,
+                N=2,
+                )
         self.x, self.y = x, y
 
     def _goto(self, cmd) -> '§':
         distance = self.pop()
-        #TODO: should take the direction (self.dir) into account.
+        # TODO: should take the direction (self.dir) into account.
         y, x = hilbert.coordinates_from_distance(distance, self.p, N=2)
         self.x, self.y = x, y
 
@@ -649,47 +687,47 @@ class Aceto(object):
         x = self.pop()
         y = self.pop()
         self.log(2, f"Testing if {y!r} > {x!r}")
-        self.push(y>x)
+        self.push(y > x)
         self.move()
 
     def _less_or_equal(self, cmd) -> 'w':
         x = self.pop()
         y = self.pop()
         self.log(2, f"Testing if {y!r} <= {x!r}")
-        self.push(y<=x)
+        self.push(y <= x)
         self.move()
 
     def _bitwise_and(self, cmd) -> 'A':
         x = self.pop()
         y = self.pop()
-        self.push(y&x)
+        self.push(y & x)
         self.move()
 
     def _bitwise_or(self, cmd) -> 'V':
         x = self.pop()
         y = self.pop()
-        self.push(y|x)
+        self.push(y | x)
         self.move()
 
     def _bitwise_xor(self, cmd) -> 'H':
         x = self.pop()
         y = self.pop()
-        self.push(y^x)
+        self.push(y ^ x)
         self.move()
 
     def _range_down(self, cmd) -> 'z':
         val = self.pop()
         if not isinstance(val, int) or val == 0:
-            raise CodeException("Can only construct range with nonzero integer")
-        step = -1 if val>0 else 1
+            raise CodeException("Can only construct range with non-0 integer")
+        step = -1 if val > 0 else 1
         self.pushiter(range(val, 0, step))
         self.move()
 
     def _range_up(self, cmd) -> 'Z':
         val = self.pop()
         if not isinstance(val, int) or val == 0:
-            raise CodeException("Can only construct range with nonzero integer")
-        step = 1 if val>0 else -1
+            raise CodeException("Can only construct range with non-0 integer")
+        step = 1 if val > 0 else -1
         self.pushiter(range(step, val+step, step))
         self.move()
 
@@ -713,20 +751,19 @@ class Aceto(object):
 
     def _sign(self, cmd) -> 'y':
         x = self.pop()
-        self.push(1 if x>0 else -1 if x<0 else 0)
+        self.push(1 if x > 0 else -1 if x < 0 else 0)
         self.move()
-
 
     def _bitwise_left(self, cmd) -> '«':
         x = self.pop()
         y = self.pop()
-        self.push(y<<x)
+        self.push(y << x)
         self.move()
 
     def _bitwise_right(self, cmd) -> '»':
         x = self.pop()
         y = self.pop()
-        self.push(y>>x)
+        self.push(y >> x)
         self.move()
 
     def _multiply_stack(self, cmd) -> '×':
@@ -765,9 +802,10 @@ def getch():
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return ch
 
+
 if __name__ == '__main__':
     args = docopt(__doc__, version="1.0")
-    A=Aceto(args)
+    A = Aceto(args)
     for filename in args['<filename>']:
         A.load_code(filename)
         A.run()
