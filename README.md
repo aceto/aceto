@@ -205,7 +205,7 @@ depends on the previous command.
   on top of the stack. Will also negate booleans and invert integers.
 - ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `F`: Pop an integer,
   then a string. Push `that_string[that_integer]`.
-- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `¥`: Implode a
+- ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `£`: Implode a
   string: Replace the stack with all of its elements, joined by empty spaces,
   casted to strings, top to bottom.
 - ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `€`: Explode a
@@ -262,7 +262,7 @@ depends on the previous command.
   timestamp to now. It is initialized to the time of script start.
 - ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `t`: Push the
   difference between now and the global timestamp.
-- ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `™`: Push a local,
+- ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `τ`: Push a local,
   datetime on the stack (year, month, day, hour, minute, second).
 - ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `C`: Pop a value and
   push a boolean: Whether the value is contained in the current stack.
