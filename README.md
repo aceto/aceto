@@ -1,7 +1,7 @@
 # Aceto
 
-Aceto ([aˈtʃeto]) is a simple stack language that is based on a 2D Hilbert curve grid. The
-name is a reference to Aceto Balsamico (balsamic vinegar), and to
+Aceto ([aˈtʃeto]) is a simple stack language that is based on a 2D Hilbert curve
+grid. The name is a reference to Aceto Balsamico (balsamic vinegar), and to
 [OIL](https://github.com/L3viathan/OIL). It was a birthday present for
 [@sarnthil](https://github.com/sarnthil).
 
