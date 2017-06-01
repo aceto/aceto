@@ -781,7 +781,7 @@ class Aceto(object):
         self.stacks[self.sid].extend(reversed(x))
         self.move()
 
-    def _implode_string(self, cmd) -> '¥':
+    def _implode_string(self, cmd) -> '¥£':
         s = ''.join(str(element) for element in self.stacks[self.sid])
         self.stacks[self.sid] = [s]
         self.move()
