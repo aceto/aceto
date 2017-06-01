@@ -9,7 +9,8 @@ Options:
     -v --verbose       Be verbose. Can be specified several times.
     -F --flush         Always flush after printing.
     -e --err-all       Ignore catch marks (@) and always error out
-    -w --windows-1252  Use Windows-1252 instead of UTF-8
+    -w --windows-1252  Use Windows-1252 instead of UTF-8 (deprecated)
+    -g --latin-7       Use Latin-7 instead of UTF-8
 """
 import sys
 import os
@@ -53,7 +54,12 @@ class Aceto(object):
         self.verbosity = args['--verbose']
         self.flushness = args['--flush']
         self.allerr = args['--err-all']
-        self.encoding = 'cp1252' if args['--windows-1252'] else 'utf-8'
+        if args['--windows-1252']:
+            self.encoding = 'cp1252'
+        elif args['--latin-7']:
+            self.encoding = 'greek'
+        else:
+            self.encoding = 'utf-8'
         # annotate this!
         self.commands = {}
         d = type(self).__dict__
@@ -603,7 +609,7 @@ class Aceto(object):
         self.timestamp = time.time()
         self.move()
 
-    def _get_datetime(self, cmd) -> '™':
+    def _get_datetime(self, cmd) -> '™τ':
         self.pushiter([*time.localtime()][:6][::-1])
         self.move()
 
