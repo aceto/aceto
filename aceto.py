@@ -665,7 +665,7 @@ class Aceto(object):
         self.move()
 
     def _queue(self, cmd) -> 'q':
-        self.stacks[self.sid].insert(self.pop())
+        self.stacks[self.sid].insert(0, self.pop())
         self.move()
 
     def _unqueue(self, cmd) -> 'Q':
@@ -781,8 +781,8 @@ class Aceto(object):
         self.stacks[self.sid].extend(reversed(x))
         self.move()
 
-    def _implode_string(self, cmd) -> '¥£':
-        s = ''.join(str(element) for element in self.stacks[self.sid])
+    def _implode_string(self, cmd) -> '£¥':
+        s = ''.join(str(element) for element in reversed(self.stacks[self.sid]))
         self.stacks[self.sid] = [s]
         self.move()
 
