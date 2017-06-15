@@ -11,6 +11,7 @@ Options:
     -e --err-all       Ignore catch marks (@) and always error out
     -w --windows-1252  Use Windows-1252 instead of UTF-8 (deprecated)
     -g --latin-7       Use Latin-7 instead of UTF-8
+    -l --linear        Use linear mode for text entry
 """
 import sys
 import os
@@ -73,16 +74,29 @@ class Aceto(object):
             except AttributeError:
                 pass
 
-    def load_code(self, filename):
+    def load_code(self, filename, linear_mode=False):
         self.code = []
         with open(filename, encoding=self.encoding) as f:
-            for line in reversed(f.readlines()):
-                self.code.append(list(line.rstrip("\n")))
-        self.p = ceil(
-                log2(
-                    max([len(self.code), max(len(line) for line in self.code)])
-                    )
-                )
+            if linear_mode:
+                code_helper = defaultdict(lambda:defaultdict(str))
+                chars = ''.join(char for line in f for char in line.strip())
+                self.p = ceil(log2(ceil(len(chars)**.5)))
+                for step, char in enumerate(chars):
+                    y, x = hilbert.coordinates_from_distance(
+                            step,
+                            self.p,
+                            N=2,
+                            )
+                    code_helper[x][y] = char
+                self.code = code_helper
+            else:
+                for line in reversed(f.readlines()):
+                    self.code.append(list(line.rstrip("\n")))
+                self.p = ceil(
+                        log2(
+                            max([len(self.code), max(len(line) for line in self.code)])
+                            )
+                        )
         self.s = 2**self.p
         self.x, self.y = 0, 0
         self.timestamp = time.time()
@@ -807,7 +821,7 @@ if __name__ == '__main__':
     args = docopt(__doc__, version="1.0")
     A = Aceto(args)
     for filename in args['<filename>']:
-        A.load_code(filename)
+        A.load_code(filename, args['--linear'])
         A.run()
     if not args['<filename>']:
         cols, _ = shutil.get_terminal_size((80, 20))
