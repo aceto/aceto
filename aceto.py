@@ -21,15 +21,16 @@ import termios
 import time
 import shutil
 import re
-from math import ceil, log2, pi, e as euler
+from math import ceil, pi, e as euler
 from numbers import Number
 from collections import defaultdict
 from random import choice, random, shuffle
 from docopt import docopt
 from hilbert_curve import hilbert
+from enum import Enum
 
 
-class colors(object):
+class colors(Enum):
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKGREEN = '\033[92m'
@@ -80,7 +81,7 @@ class Aceto(object):
             if linear_mode:
                 code_helper = defaultdict(lambda:defaultdict(str))
                 chars = ''.join(char for line in f for char in line.strip())
-                self.p = ceil(log2(ceil(len(chars)**.5)))
+                self.p = (ceil(len(chars)**.5) - 1).bit_length()
                 for step, char in enumerate(chars):
                     y, x = hilbert.coordinates_from_distance(
                             step,
@@ -92,11 +93,10 @@ class Aceto(object):
             else:
                 for line in reversed(f.readlines()):
                     self.code.append(list(line.rstrip("\n")))
-                self.p = ceil(
-                        log2(
-                            max([len(self.code), max(len(line) for line in self.code)])
-                            )
-                        )
+                self.p = (max(
+                    len(self.code),
+                    max(map(len, self.code)),
+                    ) - 1).bit_length()
         self.s = 2**self.p
         self.x, self.y = 0, 0
         self.timestamp = time.time()
@@ -121,8 +121,7 @@ class Aceto(object):
         self.stacks[self.sid].append(thing)
 
     def pushiter(self, iterable):
-        for element in iterable:
-            self.push(element)
+        self.stacks[self.sid].extend(iterable)
 
     def pop(self):
         try:
@@ -135,9 +134,9 @@ class Aceto(object):
 
     def log(self, level, *pargs, **kwargs):
         if level <= self.verbosity:
-            print(colors.FAIL, file=sys.stderr, end='')
+            print(colors.FAIL.value, file=sys.stderr, end='')
             print(*pargs, file=sys.stderr, **kwargs)
-            print(colors.ENDC, file=sys.stderr, end='', flush=True)
+            print(colors.ENDC.value, file=sys.stderr, end='', flush=True)
 
     def next_coord(self):
         """Return the next coordinate"""
@@ -147,7 +146,7 @@ class Aceto(object):
                 N=2,
                 )
         y, x = hilbert.coordinates_from_distance(
-                distance+self.dir,
+                distance + self.dir,
                 self.p,
                 N=2,
                 )
@@ -211,12 +210,12 @@ class Aceto(object):
     def _left(self, cmd) -> '<W':
         if cmd == 'W':
             self.code[self.x][self.y] = 'N'
-        self.move((self.x, (self.y-1) % self.s))
+        self.move((self.x, (self.y - 1) % self.s))
 
     def _right(self, cmd) -> '>E':
         if cmd == 'E':
             self.code[self.x][self.y] = 'S'
-        self.move((self.x, ((self.y+1) % self.s)))
+        self.move((self.x, ((self.y + 1) % self.s)))
 
     def _down(self, cmd) -> 'vS':
         if cmd == 'S':
@@ -224,14 +223,14 @@ class Aceto(object):
         self.log(
               2,
               f"{self.s} From {self.x},{self.y} to "
-              f"{(self.x-1) % self.s}, {self.y}",
+              f"{(self.x - 1) % self.s}, {self.y}",
              )
-        self.move(((self.x-1) % self.s, self.y))
+        self.move(((self.x - 1) % self.s, self.y))
 
     def _up(self, cmd) -> '^N':
         if cmd == 'N':
             self.code[self.x][self.y] = 'E'
-        self.move(((self.x+1) % self.s, self.y))
+        self.move(((self.x + 1) % self.s, self.y))
 
     def _numeric(self, cmd) -> '1234567890':
         self.push(int(cmd))
@@ -241,7 +240,7 @@ class Aceto(object):
         x = self.pop()
         y = self.pop()
         try:
-            self.push(y+x)
+            self.push(y + x)
             self.move()
         except TypeError:
             raise CodeException(f"Can't add {x!r} to {y!r}")
@@ -266,7 +265,7 @@ class Aceto(object):
         if isinstance(x, Number):
             y = self.pop()
             try:
-                self.push(y-x)
+                self.push(y - x)
             except TypeError:
                 raise CodeException(f"Can't subtract {x!r} from {y!r}")
         else:
@@ -389,7 +388,7 @@ class Aceto(object):
     def _increment(self, cmd) -> 'I':
         x = self.pop()
         try:
-            self.push(x+1)
+            self.push(x + 1)
         except Exception:
             self.push(1)
         self.move()
@@ -397,7 +396,7 @@ class Aceto(object):
     def _decrement(self, cmd) -> 'D':
         x = self.pop()
         try:
-            self.push(x-1)
+            self.push(x - 1)
         except Exception:
             self.push(1)
         self.move()
@@ -482,7 +481,7 @@ class Aceto(object):
     def _mirror_h(self, cmd) -> '|':
         cond = self.pop()
         if cond:
-            new_pos = (self.x, 2**self.p-(self.y+1))
+            new_pos = (self.x, 2**self.p - (self.y + 1))
             self.log(
                     2,
                     "Mirroring horizontally from",
@@ -498,7 +497,7 @@ class Aceto(object):
     def _mirror_v(self, cmd) -> '_':
         cond = self.pop()
         if cond:
-            new_pos = (2**self.p-(self.x+1), self.y)
+            new_pos = (2**self.p - (self.x + 1), self.y)
             self.log(
                     2,
                     "Mirroring vertically from",
@@ -514,7 +513,7 @@ class Aceto(object):
     def _mirror_vh(self, cmd) -> '#':
         cond = self.pop()
         if cond:
-            new_pos = (2**self.p-(self.x+1), 2**self.p-(self.y+1))
+            new_pos = (2**self.p - (self.x + 1), 2**self.p - (self.y + 1))
             self.log(2, "Mirroring (both) from", self.x, self.y, "to", new_pos)
             self.move(new_pos)
         else:
@@ -598,7 +597,7 @@ class Aceto(object):
             self.x, self.y = 0, 0
         else:
             length = 2**self.p
-            self.x, self.y = 0, length-1
+            self.x, self.y = 0, length - 1
 
     def _getch(self, cmd) -> ',':
         ch = getch()
@@ -654,7 +653,7 @@ class Aceto(object):
             self.move()
 
     def _get_stopwatch(self, cmd) -> 't':
-        self.push(time.time()-self.timestamp)
+        self.push(time.time() - self.timestamp)
         self.move()
 
     def _set_stopwatch(self, cmd) -> 'T':
@@ -742,7 +741,7 @@ class Aceto(object):
         if not isinstance(val, int) or val == 0:
             raise CodeException("Can only construct range with non-0 integer")
         step = 1 if val > 0 else -1
-        self.pushiter(range(step, val+step, step))
+        self.pushiter(range(step, val + step, step))
         self.move()
 
     def _order_up(self, cmd) -> 'G':
@@ -796,7 +795,7 @@ class Aceto(object):
         self.move()
 
     def _implode_string(self, cmd) -> '£¥':
-        s = ''.join(str(element) for element in reversed(self.stacks[self.sid]))
+        s = ''.join(map(str, reversed(self.stacks[self.sid])))
         self.stacks[self.sid] = [s]
         self.move()
 
