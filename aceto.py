@@ -21,7 +21,7 @@ import termios
 import time
 import shutil
 import re
-from math import ceil, pi, e as euler
+from math import ceil, log2, pi, e as euler
 from numbers import Number
 from collections import defaultdict
 from random import choice, random, shuffle
@@ -80,7 +80,7 @@ class Aceto(object):
             if linear_mode:
                 code_helper = defaultdict(lambda:defaultdict(str))
                 chars = ''.join(char for line in f for char in line.strip())
-                self.p = ceil(len(chars)**.5).bit_length()
+                self.p = ceil(log2(ceil(len(chars)**.5)))
                 for step, char in enumerate(chars):
                     y, x = hilbert.coordinates_from_distance(
                             step,
@@ -92,7 +92,11 @@ class Aceto(object):
             else:
                 for line in reversed(f.readlines()):
                     self.code.append(list(line.rstrip("\n")))
-                self.p = max(len(self.code), max(map(len, self.code))).bit_length()
+                self.p = ceil(
+                        log2(
+                            max([len(self.code), max(len(line) for line in self.code)])
+                            )
+                        )
         self.s = 2**self.p
         self.x, self.y = 0, 0
         self.timestamp = time.time()
@@ -117,7 +121,8 @@ class Aceto(object):
         self.stacks[self.sid].append(thing)
 
     def pushiter(self, iterable):
-        self.stacks[self.sid].extend(iterable)
+        for element in iterable:
+            self.push(element)
 
     def pop(self):
         try:
@@ -137,7 +142,7 @@ class Aceto(object):
     def next_coord(self):
         """Return the next coordinate"""
         distance = hilbert.distance_from_coordinates(
-                (self.y, self.x),
+                [self.y, self.x],
                 self.p,
                 N=2,
                 )
@@ -791,7 +796,7 @@ class Aceto(object):
         self.move()
 
     def _implode_string(self, cmd) -> '£¥':
-        s = ''.join(map(str, reversed(self.stacks[self.sid])))
+        s = ''.join(str(element) for element in reversed(self.stacks[self.sid]))
         self.stacks[self.sid] = [s]
         self.move()
 
