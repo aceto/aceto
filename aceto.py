@@ -50,53 +50,63 @@ class Aceto(object):
         self.stacks = defaultdict(list)
         self.sticky = set()
         self.sid = 0
-        self.buf = ''
         self.quick = ''
-        self.x, self.y = 0, 0
         self.verbosity = args['--verbose']
         self.flushness = args['--flush']
         self.allerr = args['--err-all']
+        self.set_encoding(args)
+        # annotate this!
+        self.commands = self.get_annotations()
+
+    def get_annotations(self):
+        cmds = {}
+        d = type(self).__dict__
+        for key in d:
+            try:
+                chars = d[key].__annotations__['return']
+                for c in chars:
+                    cmds[c] = d[key]
+            except KeyError:
+                pass
+            except AttributeError:
+                pass
+        return cmds
+
+    def set_encoding(self, args):
         if args['--windows-1252']:
             self.encoding = 'cp1252'
         elif args['--latin-7']:
             self.encoding = 'greek'
         else:
             self.encoding = 'utf-8'
-        # annotate this!
-        self.commands = {}
-        d = type(self).__dict__
-        for key in d:
-            try:
-                chars = d[key].__annotations__['return']
-                for c in chars:
-                    self.commands[c] = d[key]
-            except KeyError:
-                pass
-            except AttributeError:
-                pass
+
+    def load_code_linear(self, fileobj):
+        code_helper = defaultdict(lambda:defaultdict(str))
+        chars = ''.join(char for line in fileobj for char in line.strip())
+        for step, char in enumerate(chars):
+            y, x = hilbert.coordinates_from_distance(
+                    step,
+                    self.p,
+                    N=2,
+                    )
+            code_helper[x][y] = char
+        return code_helper, (ceil(len(chars)**.5) - 1).bit_length()
+
+    def load_code_hilbert(self, fileobj):
+        code = []
+        for line in reversed(fileobj.readlines()):
+            code.append(list(line.rstrip("\n")))
+        return code, (max(
+            len(code),
+            max(map(len, code)),
+            ) - 1).bit_length()
 
     def load_code(self, filename, linear_mode=False):
-        self.code = []
         with open(filename, encoding=self.encoding) as f:
             if linear_mode:
-                code_helper = defaultdict(lambda:defaultdict(str))
-                chars = ''.join(char for line in f for char in line.strip())
-                self.p = (ceil(len(chars)**.5) - 1).bit_length()
-                for step, char in enumerate(chars):
-                    y, x = hilbert.coordinates_from_distance(
-                            step,
-                            self.p,
-                            N=2,
-                            )
-                    code_helper[x][y] = char
-                self.code = code_helper
+                self.code, self.p = self.load_code_linear(f)
             else:
-                for line in reversed(f.readlines()):
-                    self.code.append(list(line.rstrip("\n")))
-                self.p = (max(
-                    len(self.code),
-                    max(map(len, self.code)),
-                    ) - 1).bit_length()
+                self.code, self.p = self.load_code_hilbert(f)
         self.s = 2**self.p
         self.x, self.y = 0, 0
         self.timestamp = time.time()
