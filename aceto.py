@@ -162,45 +162,62 @@ class Aceto(object):
                 )
         return x, y
 
-    def step(self):
+    def step_command_mode(self, cmd):
+        method = self.commands.get(cmd, Aceto._nop)
+        method(self, cmd)
+        self.previous_cmd = cmd
+
+    def step_string_mode(self, cmd):
+        if cmd == '"' and self.mode == 'string':
+            self.push(self.buf)
+            self.buf = ''
+            self.mode = 'command'
+        elif cmd == '\\' and self.mode == 'string':
+            self.mode = 'string-escape'
+        elif self.mode == 'string-escape' and cmd in "nt":
+            self.buf += {'n': '\n', 't': '\t'}[cmd]
+            self.mode = 'string'
+        else:
+            self.buf += cmd
+            self.mode = 'string'
+        self.move()
+
+    def step_char_mode(self, cmd):
+        if cmd == '\\' and self.mode == 'char':
+            self.mode = 'char-escape'
+        elif self.mode == 'char-escape' and cmd in 'nt':
+            self.push({'n': '\n', 't': '\t'}[cmd])
+            self.mode = 'command'
+        else:
+            self.push(cmd)
+            self.mode = 'command'
+        self.move()
+
+    def step_escape_mode(self, cmd):
+        self.move()
+        self.mode = 'command'
+
+    def get_command(self):
         try:
-            cmd = self.code[self.x][self.y]
+            return self.code[self.x][self.y]
         except IndexError:
-            cmd = ' '  # nop
+            return ' '  # nop
+
+    def step(self):
+        cmd = self.get_command()
         if cmd != ' ':
             self.log(1, cmd, end='')
             self.log(2, "\nActive stack:", self.stacks[self.sid])
         if self.mode == 'command':
-            method = self.commands.get(cmd, Aceto._nop)
-            method(self, cmd)
-            self.previous_cmd = cmd
+            self.step_command_mode(cmd)
         elif self.mode in ('string', 'string-escape'):
-            if cmd == '"' and self.mode == 'string':
-                self.push(self.buf)
-                self.buf = ''
-                self.mode = 'command'
-            elif cmd == '\\' and self.mode == 'string':
-                self.mode = 'string-escape'
-            elif self.mode == 'string-escape' and cmd in "nt":
-                self.buf += {'n': '\n', 't': '\t'}[cmd]
-                self.mode = 'string'
-            else:
-                self.buf += cmd
-                self.mode = 'string'
-            self.move()
+            self.step_string_mode(cmd)
         elif self.mode in ('char', 'char-escape'):
-            if cmd == '\\' and self.mode == 'char':
-                self.mode = 'char-escape'
-            elif self.mode == 'char-escape' and cmd in 'nt':
-                self.push({'n': '\n', 't': '\t'}[cmd])
-                self.mode = 'command'
-            else:
-                self.push(cmd)
-                self.mode = 'command'
-            self.move()
+            self.step_char_mode(cmd)
         elif self.mode == 'escape':
-            self.move()
-            self.mode = 'command'
+            self.step_escape_mode(cmd)
+        else:
+            raise CodeException("Invalid mode:", self.mode)
 
     def move(self, coords=None):
         if coords is not None:
