@@ -25,12 +25,13 @@ from math import ceil, pi, e as euler
 from numbers import Number
 from collections import defaultdict
 from random import choice, random, shuffle
+from enum import Enum
 from docopt import docopt
 from hilbert_curve import hilbert
-from enum import Enum
 
 
-class colors(Enum):
+class Colors(Enum):
+    """ Terminal colors """
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKGREEN = '\033[92m'
@@ -42,10 +43,12 @@ class colors(Enum):
 
 
 class CodeException(Exception):
+    """ Generic exception for Aceto errors """
     pass
 
 
 class Aceto(object):
+    """ Interpreter object """
     def __init__(self, args):
         self.stacks = defaultdict(list)
         self.sticky = set()
@@ -80,27 +83,29 @@ class Aceto(object):
         else:
             self.encoding = 'utf-8'
 
-    def load_code_linear(self, fileobj):
-        code_helper = defaultdict(lambda:defaultdict(str))
+    @staticmethod
+    def load_code_linear(fileobj):
+        code_helper = defaultdict(lambda: defaultdict(str))
         chars = ''.join(char for line in fileobj for char in line.strip())
         p = (ceil(len(chars)**.5) - 1).bit_length()
         for step, char in enumerate(chars):
             y, x = hilbert.coordinates_from_distance(
-                    step,
-                    p,
-                    N=2,
-                    )
+                step,
+                p,
+                N=2,
+            )
             code_helper[x][y] = char
         return code_helper, p
 
-    def load_code_hilbert(self, fileobj):
+    @staticmethod
+    def load_code_hilbert(fileobj):
         code = []
         for line in reversed(fileobj.readlines()):
             code.append(list(line.rstrip("\n")))
         return code, (max(
             len(code),
             max(map(len, code)),
-            ) - 1).bit_length()
+        ) - 1).bit_length()
 
     def load_code(self, filename, linear_mode=False):
         with open(filename, encoding=self.encoding) as f:
@@ -145,22 +150,22 @@ class Aceto(object):
 
     def log(self, level, *pargs, **kwargs):
         if level <= self.verbosity:
-            print(colors.FAIL.value, file=sys.stderr, end='')
+            print(Colors.FAIL.value, file=sys.stderr, end='')
             print(*pargs, file=sys.stderr, **kwargs)
-            print(colors.ENDC.value, file=sys.stderr, end='', flush=True)
+            print(Colors.ENDC.value, file=sys.stderr, end='', flush=True)
 
     def next_coord(self):
         """Return the next coordinate"""
         distance = hilbert.distance_from_coordinates(
-                [self.y, self.x],
-                self.p,
-                N=2,
-                )
+            [self.y, self.x],
+            self.p,
+            N=2,
+        )
         y, x = hilbert.coordinates_from_distance(
-                distance + self.dir,
-                self.p,
-                N=2,
-                )
+            distance + self.dir,
+            self.p,
+            N=2,
+        )
         return x, y
 
     def step_command_mode(self, cmd):
@@ -249,10 +254,10 @@ class Aceto(object):
         if cmd == 'S':
             self.code[self.x][self.y] = 'W'
         self.log(
-              2,
-              f"{self.s} From {self.x},{self.y} to "
-              f"{(self.x - 1) % self.s}, {self.y}",
-             )
+            2,
+            f"{self.s} From {self.x},{self.y} to "
+            f"{(self.x - 1) % self.s}, {self.y}",
+        )
         self.move(((self.x - 1) % self.s, self.y))
 
     def _up(self, cmd) -> '^N':
@@ -511,13 +516,13 @@ class Aceto(object):
         if cond:
             new_pos = (self.x, 2**self.p - (self.y + 1))
             self.log(
-                    2,
-                    "Mirroring horizontally from",
-                    self.x,
-                    self.y,
-                    "to",
-                    new_pos,
-                    )
+                2,
+                "Mirroring horizontally from",
+                self.x,
+                self.y,
+                "to",
+                new_pos,
+            )
             self.move(new_pos)
         else:
             self.move()
@@ -527,13 +532,13 @@ class Aceto(object):
         if cond:
             new_pos = (2**self.p - (self.x + 1), self.y)
             self.log(
-                    2,
-                    "Mirroring vertically from",
-                    self.x,
-                    self.y,
-                    "to",
-                    new_pos,
-                    )
+                2,
+                "Mirroring vertically from",
+                self.x,
+                self.y,
+                "to",
+                new_pos,
+            )
             self.move(new_pos)
         else:
             self.move()
@@ -639,21 +644,21 @@ class Aceto(object):
         method(self, self.previous_cmd)
 
     def _empty_stack(self, cmd) -> 'ø':
-        self.stack[self.sid] = []
+        self.stacks[self.sid] = []
         self.move()
 
     def _jump(self, cmd) -> 'j':
         steps = self.pop()
         distance = hilbert.distance_from_coordinates(
-                [self.y, self.x],
-                self.p,
-                N=2,
-                )
+            [self.y, self.x],
+            self.p,
+            N=2,
+        )
         y, x = hilbert.coordinates_from_distance(
-                distance + self.dir * steps,
-                self.p,
-                N=2,
-                )
+            distance + self.dir * steps,
+            self.p,
+            N=2,
+        )
         self.x, self.y = x, y
 
     def _goto(self, cmd) -> '§':
@@ -845,12 +850,12 @@ def getch():
 
 
 if __name__ == '__main__':
-    args = docopt(__doc__, version="1.0")
-    A = Aceto(args)
-    for filename in args['<filename>']:
-        A.load_code(filename, args['--linear'])
+    ARGS = docopt(__doc__, version="1.0")
+    A = Aceto(ARGS)
+    for filename in ARGS['<filename>']:
+        A.load_code(filename, ARGS['--linear'])
         A.run()
-    if not args['<filename>']:
+    if not ARGS['<filename>']:
         cols, _ = shutil.get_terminal_size((80, 20))
         info = [f'{c} {f.__name__[1:]}' for c, f in A.commands.items()]
         info.sort()
