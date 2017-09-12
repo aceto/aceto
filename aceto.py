@@ -83,14 +83,15 @@ class Aceto(object):
     def load_code_linear(self, fileobj):
         code_helper = defaultdict(lambda:defaultdict(str))
         chars = ''.join(char for line in fileobj for char in line.strip())
+        p = (ceil(len(chars)**.5) - 1).bit_length()
         for step, char in enumerate(chars):
             y, x = hilbert.coordinates_from_distance(
                     step,
-                    self.p,
+                    p,
                     N=2,
                     )
             code_helper[x][y] = char
-        return code_helper, (ceil(len(chars)**.5) - 1).bit_length()
+        return code_helper, p
 
     def load_code_hilbert(self, fileobj):
         code = []
