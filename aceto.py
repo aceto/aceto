@@ -835,6 +835,8 @@ class Aceto(object):
 
 def getch():
     fd = sys.stdin.fileno()
+    if not os.isatty(fd):
+        return sys.stdin.read(1)
     old_settings = termios.tcgetattr(fd)
     try:
         tty.setraw(sys.stdin.fileno())
