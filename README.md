@@ -190,7 +190,7 @@ depends on the previous command.
 - ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `"`: Starts a string
   literal. This works pretty much like in other languages. String literals are
   terminated with another `"`, but escaping (with a backslash) works too. That
-  means that `"\"Hello\\World\n" will result in `"Hello\World\n`, where the `\n`
+  means that `"\"Hello\\World\n"` will result in `"Hello\World\n`, where the `\n`
   is a newline character (`\t` is also supported). The resulting string will be
   pushed on the active stack.
 - ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `'`: Starts a
