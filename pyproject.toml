@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "acetolang"
+version = "1.10.0"
+description = "A programming language on a Hilbert curve"
+authors = ["L3viathan <git@l3vi.de>"]
+include = ["hilbert_curve"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+click = "^7.1.2"
+hilbertcurve = "^1.0.3"
+
+[tool.poetry.dev-dependencies]
+ipdb = "^0.13.3"
+
+[tool.poetry.scripts]
+aceto = "acetolang:cli"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
