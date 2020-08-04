@@ -5,7 +5,6 @@ import signal
 import tty
 import termios
 import time
-import click
 import shutil
 import re
 from math import ceil, pi, e as euler
@@ -13,6 +12,8 @@ from numbers import Number
 from collections import defaultdict
 from random import choice, random, shuffle
 from enum import Enum
+
+import click
 from hilbertcurve.hilbertcurve import HilbertCurve
 
 
@@ -35,7 +36,7 @@ class CodeException(Exception):
     pass
 
 
-class Aceto(object):
+class Aceto:
     """ Interpreter object """
 
     def __init__(self, verbosity, flushness, allerr, encoding):
@@ -63,6 +64,27 @@ class Aceto(object):
             except AttributeError:
                 pass
         return cmds
+
+    def print_commands(self):
+        cols, _ = shutil.get_terminal_size((80, 20))
+        info = [f"{c} {f.__name__[1:]}" for c, f in self.commands.items()]
+        info.sort()
+        maxlen = max(len(x) for x in info) + 1
+        columns = cols // maxlen
+        iinfo = iter(info)
+        end_character = "" if sys.stdout.isatty() else "\n"
+        try:
+            while True:
+                for _ in range(columns):
+                    item = next(iinfo)
+                    # skip all numbers except for 0
+                    while any(item.startswith(x) for x in "123456789"):
+                        item = next(iinfo)
+                    print(item.ljust(maxlen), end=end_character)
+                if not end_character:
+                    print()
+        except StopIteration:
+            print()
 
     @staticmethod
     def load_code_linear(fileobj):
@@ -818,22 +840,4 @@ def cli(files, verbose, flush, err_all, windows_1252, latin_7, linear):
         A.load_code(filename, linear)
         A.run()
     if not files:
-        cols, _ = shutil.get_terminal_size((80, 20))
-        info = [f"{c} {f.__name__[1:]}" for c, f in A.commands.items()]
-        info.sort()
-        maxlen = max(len(x) for x in info) + 1
-        columns = cols // maxlen
-        iinfo = iter(info)
-        end_character = "" if sys.stdout.isatty() else "\n"
-        try:
-            while True:
-                for _ in range(columns):
-                    item = next(iinfo)
-                    # skip all numbers except for 0
-                    while any(item.startswith(x) for x in "123456789"):
-                        item = next(iinfo)
-                    print(item.ljust(maxlen), end=end_character)
-                if not end_character:
-                    print()
-        except StopIteration:
-            print()
+        A.print_commands()
