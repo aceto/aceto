@@ -3,7 +3,6 @@ name = "acetolang"
 version = "1.10.0"
 description = "A programming language on a Hilbert curve"
 authors = ["L3viathan <git@l3vi.de>"]
-include = ["hilbert_curve"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
