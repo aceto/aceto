@@ -8,9 +8,10 @@ grid. The name is a reference to Aceto Balsamico (balsamic vinegar), and to
 
 ## Installation
 
-    pip install aceto
+    pip install acetolang
 
-If your `pip` refers to Python 2's pip, instead use `pip3`.
+If your `pip` refers to Python 2's pip, instead use `pip3`. The "binary" that
+will be installed is called `aceto`.
 
 ## Concept
 
