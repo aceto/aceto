@@ -5,6 +5,13 @@ grid. The name is a reference to Aceto Balsamico (balsamic vinegar), and to
 [OIL](https://github.com/L3viathan/OIL). It was a birthday present for
 [@sarnthil](https://github.com/sarnthil).
 
+
+## Installation
+
+    pip install aceto
+
+If your `pip` refers to Python 2's pip, instead use `pip3`.
+
 ## Concept
 
 A program written in Aceto consists of a square grid of characters.
@@ -53,15 +60,15 @@ prints the number `6` that is on the stack.
 ## Commands
 
 The colored marks generally mean that the number of elements in all stacks
-together is ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) increasing,
-![#f03c15](https://placehold.it/15/f03c15/000000?text=+) decreasing, or
-![#1589F0](https://placehold.it/15/1589F0/000000?text=+) staying the same. In
-sticky mode, or when stacks aren't sufficiently full, that can vary (for
-example, `+` is normally decreasing the total number of elements by 1, but
-increases them by one if the stack was empty before). There is currently one
-command where the impact on total number of elements is
-![#f0e788](https://placehold.it/15/f0e788/000000?text=+) undefined, because it
-depends on the previous command.
+together is ![#c5f015](https://placehold.it/15/c5f015/000000?text=+)
+increasing, ![#f03c15](https://placehold.it/15/f03c15/000000?text=+)
+decreasing, or ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) staying
+the same. In sticky mode, or when stacks aren't sufficiently full, that can
+vary (for example, `+` is normally decreasing the total number of elements by
+1, but increases them by one if the stack was empty before). There are some
+commands where the impact on total number of elements is
+![#f0e788](https://placehold.it/15/f0e788/000000?text=+) undefined, because
+they depends on the previous command.
 
 ### General
 - ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) ` ` (a space): Do
