@@ -1,11 +1,11 @@
 [tool.poetry]
 name = "acetolang"
-version = "1.10.0"
+version = "1.10.1"
 description = "A programming language on a Hilbert curve"
 authors = ["L3viathan <git@l3vi.de>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.6"
 click = "^7.1.2"
 hilbertcurve = "^1.0.3"
 
