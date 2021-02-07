@@ -54,10 +54,6 @@ interpreter move downwards (despite the curve). In this case, not writing the
 `v` wouldn't have made a difference, because spaces do nothing. The final `p`
 prints the number `6` that is on the stack.
 
-## Installation
-
-    git clone https://github.com/L3viathan/aceto --recursive
-
 ## Commands
 
 The colored marks generally mean that the number of elements in all stacks

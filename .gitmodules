@@ -1,4 +1,0 @@
-[submodule "hilbert_curve"]
-	path = hilbert_curve
-	url = https://github.com/galtay/hilbert_curve
-	ignore = dirty
