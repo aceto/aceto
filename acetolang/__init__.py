@@ -78,7 +78,7 @@ class Aceto:
                 for _ in range(columns):
                     item = next(iinfo)
                     # skip all numbers except for 0
-                    while any(item.startswith(x) for x in "123456789"):
+                    while item.startswith(tuple("123456789")):
                         item = next(iinfo)
                     print(item.ljust(maxlen), end=end_character)
                 if not end_character:
